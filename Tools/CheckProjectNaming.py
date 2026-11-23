@@ -49,8 +49,8 @@ def validate_path(path):
         name = parts[-1]
         if name.endswith(".cs") and not PASCAL.fullmatch(name[:-3]):
             issues.append(f"{path}: C# file name must match its PascalCase class name.")
-        if name.endswith(".csproj") and not PASCAL.fullmatch(name[:-7]):
-            issues.append(f"{path}: C# project file stem must use PascalCase.")
+        if name.endswith(".csproj") and not all(PASCAL.fullmatch(part) for part in name[:-7].split(".")):
+            issues.append(f"{path}: C# project file stem must use PascalCase segments.")
         return issues
 
     for directory in parts[:-1]:
