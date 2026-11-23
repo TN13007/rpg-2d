@@ -28,7 +28,10 @@ Validate one complete player journey before expanding the system set. Design dir
 
 ## Current project snapshot
 
-The repository contains the Godot project, icon and supplied Ninja Adventure asset pack. The current foundation PR establishes the C# runtime project, naming rules, test harness and CI. Gameplay systems and a playable journey are not considered implemented until present on main and verified.
+- The project foundation is merged into `main`: Godot 4.7.2 .NET / C#, naming standards, tests and CI.
+- Issue #6 imports the Ninja Adventure pack into category-specific `assets/` folders. The vendor's original internal filenames and folder names are preserved under the `ninja_adventure` marker; its CC0 license and source notes are retained.
+- Issue #6 adds a reusable Player scene and a movement test arena. The proposed behavior is four-direction movement, WASD/arrow input, directional idle/walk frames, collision and camera follow.
+- The Issue #6 branch is not part of `main` until its PR is reviewed and merged. Do not describe its prototype as a released main-branch feature yet.
 
 ## Session protocol
 
@@ -47,8 +50,9 @@ Git lifecycle and commit rules live in [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Current handoff
 
-**Current foundation task:** Issue #4 — coding standards, tests and CI validation.  
-**Next product task:** define the first end-to-end playable slice. Validate movement, spatial interaction and a meaningful transition between locations before introducing broader architecture.
+**Current product task:** [Issue #6 — asset import and controllable player scene](https://github.com/TN13007/rpg-2d/issues/6).  
+**Branch:** `feat/issue-6-player-character-controller`.  
+**Next verification:** run unified repository validation, Godot headless import/build, then manually test WASD/arrows, diagonal speed, facing/animation, wall collision and camera follow.
 
 Do not recreate the old RPG architecture, implement generic managers, or add systems without a player-facing scenario.
 
