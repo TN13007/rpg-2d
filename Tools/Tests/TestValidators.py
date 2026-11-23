@@ -27,7 +27,7 @@ class NamingTests(unittest.TestCase):
         self.assertIsNone(naming.BRANCH.fullmatch("feat/room-exploration"))
 
     def test_snake_case_game_paths_pass(self):
-        self.assertEqual([], naming.validate_path("scripts/features/exploration/player_controller.cs"))
+        self.assertEqual([], naming.validate_path("scenes/exploration/player_controller.tscn"))\n        self.assertEqual([], naming.validate_path("scripts/features/exploration/PlayerController.cs"))
         self.assertEqual([], naming.validate_path("scenes/exploration/dormitory_room.tscn"))
 
     def test_pascal_case_csharp_files_pass(self):
