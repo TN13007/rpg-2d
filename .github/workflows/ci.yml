@@ -1,0 +1,63 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+  push:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: Validate project
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+      - name: Set up Godot 4.7.2 .NET
+        uses: chickensoft-games/setup-godot@v2
+        with:
+          version: 4.7.2
+          use-dotnet: true
+          include-templates: false
+      - name: Resolve comparison refs
+        id: refs
+        shell: bash
+        run: |
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            echo "base=${{ github.event.pull_request.base.sha }}" >> "$GITHUB_OUTPUT"
+            echo "branch=${{ github.head_ref }}" >> "$GITHUB_OUTPUT"
+          elif [[ "${{ github.event_name }}" == "push" ]]; then
+            echo "base=${{ github.event.before }}" >> "$GITHUB_OUTPUT"
+            echo "branch=" >> "$GITHUB_OUTPUT"
+          else
+            echo "base=$(git rev-parse "${{ github.sha }}^")" >> "$GITHUB_OUTPUT"
+            echo "branch=" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Import Godot project
+        run: godot --headless --editor --path . --quit
+      - name: Build Godot C# project
+        run: godot --headless --build-solutions --path . --quit
+      - name: Run unified validation
+        run: >-
+          python Tools/Validate.py
+          --base "${{ steps.refs.outputs.base }}"
+          --head "${{ github.sha }}"
+          --branch "${{ steps.refs.outputs.branch }}"
+          ${{ github.event_name == 'pull_request' && '--check-branch' || '' }}

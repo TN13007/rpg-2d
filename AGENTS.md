@@ -1,6 +1,6 @@
 # Repository Instructions for Coding Agents
 
-This is a Godot 2D RPG. The scripting runtime and language must be confirmed before implementation; the repository currently has no gameplay code or .NET project.
+This project uses Godot 4.7.2 .NET / C#. Follow [Coding standards](Docs/Architecture/CodingStandards.md) and [Testing strategy](Docs/Architecture/TestingStrategy.md) for implementation rules.
 
 ## Start with task context
 
@@ -25,14 +25,15 @@ If documentation and implementation disagree, report the mismatch and verify aga
 ## Implementation guardrails
 
 - Design around a concrete player-facing scenario. Prefer a complete, testable player journey over disconnected systems.
-- Keep feature-specific behavior near its owning feature. Put code in shared folders only when genuinely used by multiple features.
+- Keep feature-specific behavior near the feature that owns the player-facing behavior.
 - Keep scene composition, gameplay rules, content data and UI responsibilities distinguishable.
 - Do not add managers, interfaces, factories, repositories, service locators or universal executors pre-emptively.
 - Do not create architecture layers solely to mirror folders.
 - Preserve scene paths, resource references, input actions and serialized IDs unless a focused migration requires changing them.
 - Do not reorganize the third-party asset pack as unrelated cleanup.
 - Avoid broad refactors and generated-file churn. Keep each PR focused on its Issue.
+- Do not add an abstraction until a real second use case or clear complexity reduction justifies it.
 
 ## Validation and reporting
 
-Follow [CONTRIBUTING.md](CONTRIBUTING.md). State exactly which checks ran and their observed results. Separate automated tests, editor/build checks and manual playtesting. Never claim a check passed unless observed.
+Run `python Tools/Validate.py --base origin/main --head HEAD` and any additional checks required by the affected feature. State exactly which checks ran and their observed results. Separate automated tests, Godot editor/build checks and manual playtesting. Never claim a check passed unless observed.

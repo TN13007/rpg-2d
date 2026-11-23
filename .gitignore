@@ -1,3 +1,12 @@
-# Godot 4+ specific ignores
+# Godot generated files
 .godot/
+.android/
 /android/
+
+# .NET build and IDE output
+**/bin/
+**/obj/
+.vs/
+.idea/
+*.user
+*.suo

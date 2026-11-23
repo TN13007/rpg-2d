@@ -2,3 +2,54 @@ root = true
 
 [*]
 charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+indent_style = space
+indent_size = 4
+
+[*.cs]
+csharp_prefer_braces = true:warning
+dotnet_diagnostic.IDE1006.severity = warning
+
+dotnet_naming_rule.types_pascal.severity = warning
+dotnet_naming_rule.types_pascal.symbols = types
+dotnet_naming_rule.types_pascal.style = pascal
+dotnet_naming_symbols.types.applicable_kinds = class, struct, interface, enum, delegate, namespace
+dotnet_naming_symbols.types.applicable_accessibilities = *
+dotnet_naming_style.pascal.capitalization = pascal_case
+
+dotnet_naming_rule.interfaces_ipascal.severity = warning
+dotnet_naming_rule.interfaces_ipascal.symbols = interfaces
+dotnet_naming_rule.interfaces_ipascal.style = ipascal
+dotnet_naming_symbols.interfaces.applicable_kinds = interface
+dotnet_naming_symbols.interfaces.applicable_accessibilities = *
+dotnet_naming_style.ipascal.required_prefix = I
+dotnet_naming_style.ipascal.capitalization = pascal_case
+
+dotnet_naming_rule.members_pascal.severity = warning
+dotnet_naming_rule.members_pascal.symbols = members
+dotnet_naming_rule.members_pascal.style = pascal
+dotnet_naming_symbols.members.applicable_kinds = method, property, event
+dotnet_naming_symbols.members.applicable_accessibilities = *
+
+dotnet_naming_rule.constants_pascal.severity = warning
+dotnet_naming_rule.constants_pascal.symbols = constants
+dotnet_naming_rule.constants_pascal.style = pascal
+dotnet_naming_symbols.constants.applicable_kinds = field
+dotnet_naming_symbols.constants.applicable_accessibilities = *
+dotnet_naming_symbols.constants.required_modifiers = const
+
+dotnet_naming_rule.fields_underscore.severity = warning
+dotnet_naming_rule.fields_underscore.symbols = fields
+dotnet_naming_rule.fields_underscore.style = underscore_camel
+dotnet_naming_symbols.fields.applicable_kinds = field
+dotnet_naming_symbols.fields.applicable_accessibilities = *
+dotnet_naming_style.underscore_camel.required_prefix = _
+dotnet_naming_style.underscore_camel.capitalization = camel_case
+
+dotnet_naming_rule.locals_camel.severity = warning
+dotnet_naming_rule.locals_camel.symbols = locals
+dotnet_naming_rule.locals_camel.style = camel
+dotnet_naming_symbols.locals.applicable_kinds = parameter, local
+dotnet_naming_symbols.locals.applicable_accessibilities = *
+dotnet_naming_style.camel.capitalization = camel_case

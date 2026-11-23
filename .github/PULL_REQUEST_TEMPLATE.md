@@ -22,22 +22,18 @@ Describe responsibilities, data flow, scene/resource changes and compatibility i
 
 ## Tests and verification
 Record actual commands and observed results. Do not check an item unless it was run.
-- [ ] Automated tests passed (when available and relevant).
-- [ ] Godot editor imported resources and opened the project (when relevant).
-- [ ] Main and affected scenes loaded (when relevant).
+- [ ] Python validator unit tests passed.
+- [ ] Naming and Markdown validation passed.
+- [ ] .NET Release tests passed.
+- [ ] Godot editor/import/build checks passed (when relevant).
 - [ ] Affected player journey was manually verified (when relevant).
-- [ ] Documentation links and rendered Markdown were checked (when relevant).
 - [ ] Untested items and reasons are listed.
 
 Commands and results:
--
 
 ## Risks and limitations
 
 ## Reviewer focus
 
 ## Learning record
-- [ ] Product verification and learning verification are recorded separately in [WORKFLOW.md](../WORKFLOW.md), when applicable.
-- Session:
-- Learner evidence (only if demonstrated):
-- Remaining practice:
+Product verification and learning verification are separate. Record learning evidence in WORKFLOW.md only when demonstrated.
