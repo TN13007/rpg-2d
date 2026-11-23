@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Project workflow
+    url: https://github.com/TN13007/rpg-2d/blob/main/CONTRIBUTING.md
+    about: Read the contribution and issue-writing rules before opening a task.
