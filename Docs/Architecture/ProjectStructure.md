@@ -11,15 +11,27 @@ RPG-2D/
 │   ├── workflows/
 │   └── PULL_REQUEST_TEMPLATE.md
 ├── assets/
-│   ├── audio/
-│   ├── characters/
-│   └── environment/
+│   ├── audio/ninja_adventure/
+│   ├── characters/ninja_adventure/
+│   │   ├── animals/
+│   │   ├── animated/
+│   │   ├── bosses/
+│   │   ├── characters/
+│   │   └── monsters/
+│   ├── effects/ninja_adventure/
+│   ├── environment/ninja_adventure/
+│   ├── items/ninja_adventure/
+│   ├── licenses/ninja_adventure/
+│   ├── reference/ninja_adventure/
+│   └── ui/ninja_adventure/
 ├── data/
 │   └── world/
 ├── Docs/
 │   ├── Architecture/
 │   └── Design/
 ├── scenes/
+│   ├── characters/
+│   ├── prototypes/
 │   └── world/
 ├── scripts/
 │   ├── bootstrap/
@@ -29,7 +41,6 @@ RPG-2D/
 ├── Tests/
 ├── Tools/
 │   └── Tests/
-├── Ninja Adventure - Asset Pack/
 ├── RPG2D.csproj
 ├── Tests/RPG2D.Tests.csproj
 ├── AGENTS.md
@@ -43,7 +54,14 @@ RPG-2D/
 
 | Folder | Responsibility |
 |---|---|
-| `assets/` | Game-owned source art, audio and UI assets. Preserve the supplied third-party pack and license. |
+| `assets/audio/` | Imported music, sound effects and jingles. |
+| `assets/characters/` | Player, NPC, animal, boss and monster artwork, grouped by source. |
+| `assets/environment/` | Backgrounds, tilesets, props and environmental animation. |
+| `assets/effects/` | Visual effects and particles. |
+| `assets/items/` | Item and equipment artwork. |
+| `assets/ui/` | Interface icons, frames and visual elements. |
+| `assets/licenses/` | Third-party licenses retained with the imported source. |
+| `assets/reference/` | Vendor readmes, previews and source reference images; not runtime content. |
 | `data/` | Authored game content grouped by domain; stable IDs are separate from player-facing labels. |
 | `scenes/` | Godot scenes grouped by player-facing feature or composition role. |
 | `scripts/bootstrap/` | Application entry point and top-level runtime composition. |
@@ -56,4 +74,4 @@ RPG-2D/
 
 Keep scenes, scripts, data and assets separate by purpose. Keep feature-specific code near its feature. Shared code requires a real second consumer. Do not create empty classes, placeholder managers or generic abstractions to populate folders. The `.godot/` cache and generated build output must not be committed.
 
-Use snake_case for scene/resource files (for example, `dormitory_room.tscn`) and PascalCase for C# files (for example, `PlayerController.cs`). Godot node names remain PascalCase. See [Coding standards](CodingStandards.md) for naming and ownership rules, and [Testing strategy](TestingStrategy.md) for test placement.
+Use snake_case for scene/resource files (for example, `player_movement_test.tscn`) and PascalCase for C# files (for example, `PlayerController.cs`). Godot node names remain PascalCase. Imported vendor content below the `ninja_adventure` marker preserves upstream names. See [Coding standards](CodingStandards.md) for naming and ownership rules, and [Testing strategy](TestingStrategy.md) for test placement.
