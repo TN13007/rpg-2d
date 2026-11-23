@@ -13,7 +13,7 @@ CAMEL = re.compile(r"^[a-z][A-Za-z0-9]*$")
 SNAKE = re.compile(r"^[a-z][a-z0-9]*(?:_[a-z0-9]+)*$")
 BRANCH = re.compile(r"^(feat|fix|docs|test|refactor|chore)/issue-[1-9][0-9]*-[a-z0-9]+(?:-[a-z0-9]+)*$")
 ROOT_FILES = {"README.md", "CONTRIBUTING.md", "AGENTS.md", "WORKFLOW.md", "project.godot", "icon.svg", "icon.svg.import", ".gitignore", ".editorconfig", "RPG2D.csproj"}
-INFRA_DIRS = {"Docs", "Tools", "Tests", ".github", "Ninja Adventure - Asset Pack"}
+INFRA_DIRS = {"Docs", "Tools", "Tests", ".github"}
 ENUM_FIELDS = {"type", "effectType", "targetType", "timeMode", "stat"}
 
 
@@ -44,13 +44,21 @@ def validate_path(path):
     issues = []
     parts = PurePosixPath(path).parts
     if any(part in INFRA_DIRS for part in parts):
-        # Infrastructure and vendor paths keep their established naming.
-        # C# source/project files still follow their language conventions.
+        # Repository-maintenance areas keep their established names.
         name = parts[-1]
         if name.endswith(".cs") and not PASCAL.fullmatch(name[:-3]):
             issues.append(f"{path}: C# file name must match its PascalCase class name.")
         if name.endswith(".csproj") and not all(PASCAL.fullmatch(part) for part in name[:-7].split(".")):
             issues.append(f"{path}: C# project file stem must use PascalCase segments.")
+        return issues
+
+    # Imported vendor assets retain their upstream internal names and layout.
+    # The category and vendor marker are project-owned and remain snake_case.
+    if parts[0] == "assets" and "ninja_adventure" in parts:
+        vendor_index = parts.index("ninja_adventure")
+        for directory in parts[:vendor_index]:
+            if not directory.startswith(".") and not SNAKE.fullmatch(directory):
+                issues.append(f"{path}: project-owned asset directory '{directory}' must use snake_case.")
         return issues
 
     for directory in parts[:-1]:
