@@ -54,6 +54,8 @@ jobs:
         run: godot --headless --editor --path . --quit
       - name: Build Godot C# project
         run: godot --headless --build-solutions --path . --quit
+      - name: Smoke test configured main scene
+        run: godot --headless --path . --quit-after 3
       - name: Run unified validation
         run: >-
           python Tools/Validate.py
