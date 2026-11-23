@@ -1,14 +1,12 @@
 # Contributing to RPG 2D
 
-Use [WORKFLOW.md](WORKFLOW.md) as the single project-status, handoff and Learning-first hub. Latest `main` is the implemented baseline; open or unmerged PRs are proposals.
+Use [WORKFLOW.md](WORKFLOW.md) as the single project-status, handoff and Learning-first hub. Latest `main` is the implemented baseline; open PRs are proposals.
 
 **Issue → Branch → Focused commits → Verification → Pull Request → Review → Merge**
 
 ## 1. Start with an Issue
 
-Search existing Issues and relevant documentation before changing code, content, design or project configuration. Create or select one Issue and define its context, expected outcome, scope, non-goals, acceptance criteria and verification. Link dependencies.
-
-An Issue describes a problem and observable outcome, not a premature list of files. Split work only when outcomes can be implemented and verified independently. Do not create abstractions merely because they might be reusable.
+Search existing Issues and relevant documentation before changing code, content, design or project configuration. Define context, expected outcome, scope, non-goals, acceptance criteria and verification. Split work only when outcomes can be implemented and verified independently.
 
 ## 2. Create a branch
 
@@ -27,49 +25,48 @@ Required pattern: `<type>/issue-<number>-<kebab-case-description>`.
 
 ## 3. Make focused commits
 
-A commit is one coherent, atomic logical change — not one file. Include all related code, tests, scenes, assets, data and docs required for that outcome; exclude unrelated cleanup; leave the repository coherent.
-
-Use Conventional Commits: `<type>(<optional-scope>): <imperative summary>`. Allowed types: `feat`, `fix`, `refactor`, `test`, `docs`, `chore`.
+A commit is one coherent, atomic logical change — not one file. Use Conventional Commits: `<type>(<optional-scope>): <imperative summary>`. Allowed types: `feat`, `fix`, `refactor`, `test`, `docs`, `chore`.
 
 Examples: `feat(exploration): add adjacent object interaction`, `fix(movement): prevent walking through room walls`, `docs(workflow): clarify runtime verification`.
 
 ## 4. Verify before opening a PR
 
-Match verification to the change:
-- **Documentation-only:** inspect Markdown rendering, internal links, terminology and consistency.
-- **Project configuration or scenes:** open the project in the selected Godot editor; check import, scene loading and affected flow.
-- **Gameplay code:** run relevant automated tests and build, then manually play the affected journey.
-- **Input, collision, animation or UI:** manual runtime verification is required; a successful build does not prove scene wiring or usability.
+Run the single local validation entry point from the repository root:
 
-This repository does not yet have a committed automated test harness or CI validation command. Do not claim tests or CI passed until they exist and actually ran. When runtime and language are established, add one predictable validation entry point and make CI call the same checks.
+```bash
+python Tools/Validate.py --base origin/main --head HEAD --branch feat/issue-12-room-exploration --check-branch
+```
 
-Record exact commands and observed results. Separate automated checks from manual playtesting and list anything not tested.
+Omit `--branch` and `--check-branch` for ordinary local validation if branch naming is not yet relevant. The command runs Python validator tests, Markdown link/anchor checks, changed-path/JSON naming checks and the .NET Release test project. It stops at the first failure and returns a non-zero exit code.
+
+Match additional verification to the change:
+- Documentation-only: inspect Markdown rendering, links, anchors and terminology.
+- Project configuration or scenes: open the project in Godot 4.7.2 .NET; verify import and affected scenes.
+- Gameplay logic: run focused automated tests and the complete suite, then manually play the affected journey.
+- Input, collision, animation, UI, scene transitions or timing: manual runtime verification is required. A successful build does not prove correct scene wiring or usability.
+
+Record exact commands and observed results. Separate automated tests, Godot editor/build checks and manual playtesting. List anything not tested.
 
 ## 5. Open a Pull Request
 
-A PR is one reviewable solution to an Issue and may contain multiple related files and commits. Explain the problem, expected outcome, solution, decisions, non-goals, limitations and verification evidence. Use the PR template.
+A PR is one reviewable solution to an Issue and may contain multiple related files and commits. Explain the problem, outcome, solution, decisions, non-goals, limitations and verification evidence. Use the PR template.
 
-Link Issues accurately: `Closes #N` only when completed; `Part of #N` for partial delivery; `Related to #N` for context. Open a Draft PR when implementation or verification is incomplete. State dependencies and merge order for dependent PRs. Inspect the full diff before requesting review.
+Link Issues accurately: `Closes #N` only when completed; `Part of #N` for partial delivery; `Related to #N` for context. Open a Draft PR when implementation or verification is incomplete. Inspect the full diff before requesting review.
 
 ## 6. Review and merge
 
-Confirm acceptance criteria, inspect the full diff, review tests and docs for consistency, resolve or record review feedback, complete required Godot runtime checks and confirm required automation passes.
-
-The repository owner reviews and merges the PR. Do not merge your own PR unless explicitly requested. Delete a remote branch after merge or abandonment only when no open PR or active work depends on it.
+Confirm acceptance criteria, inspect the full diff, review tests and docs, resolve or record review feedback, complete required Godot runtime checks and confirm required automation passes. The repository owner reviews and merges. Do not merge your own PR unless explicitly requested.
 
 ## 7. Definition of Done
 
 A task is done when acceptance criteria are met, relevant automated checks pass, the affected player journey is manually verified when applicable, documentation matches implementation, and the PR is reviewed and merged.
 
-## 8. Naming conventions
+## 8. Canonical engineering standards
 
-Use descriptive `PascalCase` for directories, C# files/types and Godot scene/resource files. Use `camelCase` for local variables and parameters, and `_camelCase` for private fields.
-
-Use `snake_case` for stable authored content IDs (characters, locations, events, actions and similar data). Use natural language for player-facing labels. Do not rename serialized IDs or assets as drive-by cleanup.
+[Coding standards](Docs/Architecture/CodingStandards.md) is the single source of truth for C#, Godot resources/scenes/nodes, data, naming, architecture boundaries and error handling. [Testing strategy](Docs/Architecture/TestingStrategy.md) owns test levels, test naming, fixtures and manual verification requirements.
 
 ## 9. Documentation governance
 
-Keep one canonical source for each kind of information:
 - `README.md`: project entry point.
 - `WORKFLOW.md`: current status, handoff and learning evidence.
 - `CONTRIBUTING.md`: stable collaboration and Git rules.
@@ -79,4 +76,4 @@ Keep one canonical source for each kind of information:
 - GitHub Issues: problems, requirements and unresolved decisions.
 - Pull Requests: proposed changes, review discussion and verification evidence.
 
-Search for an existing canonical home before creating a document. Do not create permanent session notes, temporary plans or duplicate status trackers.
+Search for an existing canonical home before creating a document. Do not create permanent session notes or duplicate status trackers.
