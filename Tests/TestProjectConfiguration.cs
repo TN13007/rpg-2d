@@ -2,17 +2,18 @@ using System;
 using System.IO;
 using Xunit;
 
-namespace RPG2D.Tests;
-
-public sealed class TestProjectConfiguration
+namespace RPG2D.Tests
 {
-    [Fact]
-    public void GodotProject_DeclaresExpectedEngineAndDotNetFeature()
+    public sealed class TestProjectConfiguration
     {
-        string projectPath = Path.Combine(AppContext.BaseDirectory, "project.godot");
-        string projectText = File.ReadAllText(projectPath);
+        [Fact]
+        public void GodotProject_DeclaresExpectedEngineAndDotNetFeature()
+        {
+            string projectPath = Path.Combine(AppContext.BaseDirectory, "project.godot");
+            string projectText = File.ReadAllText(projectPath);
 
-        Assert.Contains("config/features=PackedStringArray(\"4.7\", \"C#\"", projectText);
-        Assert.Contains("project/assembly_name=\"RPG2D\"", projectText);
+            Assert.Contains("config/features=PackedStringArray(\"4.7\", \"C#\"", projectText);
+            Assert.Contains("project/assembly_name=\"RPG2D\"", projectText);
+        }
     }
 }
