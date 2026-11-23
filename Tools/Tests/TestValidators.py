@@ -34,6 +34,7 @@ class NamingTests(unittest.TestCase):
     def test_pascal_case_csharp_files_pass(self):
         self.assertEqual([], naming.validate_path("scripts/features/exploration/PlayerController.cs"))
         self.assertEqual([], naming.validate_path("Tests/PlayerMovementTests.cs"))
+        self.assertEqual([], naming.validate_path("Tests/RPG2D.Tests.csproj"))
 
     def test_invalid_game_paths_fail(self):
         self.assertTrue(naming.validate_path("Scripts/features/player_controller.cs"))
