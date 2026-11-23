@@ -46,7 +46,7 @@ Godot's general guide recommends snake_case for folders and non-C# resources, Pa
 | Scene/resource file stem | PascalCase | `DormitoryRoom.tscn` |
 | Node name | PascalCase | `InteractionPrompt` |
 | Input action | snake_case | `move_left`, `interact` |
-| Signal concept | Past-tense phrase | `interaction_completed` |
+| C# signal/event | Past-tense PascalCase | `InteractionCompleted` |
 | Godot sidecar | Engine-generated; do not rename manually | `.uid`, `.import` |
 
 Node paths, resource UIDs, signal names and input actions are compatibility-sensitive. Rename them only in a focused migration and update all references. Never rename third-party asset files as unrelated cleanup.
