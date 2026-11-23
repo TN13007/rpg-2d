@@ -1,6 +1,6 @@
 # Coding Standards
 
-These rules combine Microsoft's C# conventions, Godot 4.7's C# and project-organization guidance, and the naming rules already used in TN13007/rpg. Where general guidance conflicts with the existing project convention, the project-specific rule below wins. Change a rule through an Issue.
+These rules follow Microsoft's C# conventions and Godot 4.7's C# and project-organization guidance. Where Godot-specific guidance is relevant, prefer the engine convention unless this document records a deliberate project constraint.
 
 ## General principles
 - Prefer clarity, explicit ownership and the simplest design that solves the current player-facing requirement.
@@ -12,19 +12,29 @@ These rules combine Microsoft's C# conventions, Godot 4.7's C# and project-organ
 
 ## C# naming
 
-Follow the [Godot 4.7 C# style guide](https://docs.godotengine.org/en/4.7/tutorials/scripting/c_sharp/c_sharp_style_guide.html) and [Microsoft identifier naming rules](https://learn.microsoft.com/en-us/dotnet/csharp/fundamentals/coding-style/identifier-names), with these project conventions:
+Follow the [Godot 4.7 C# style guide](https://docs.godotengine.org/en/4.7/tutorials/scripting/c_sharp/c_sharp_style_guide.html) and [Microsoft identifier naming rules](https://learn.microsoft.com/en-us/dotnet/csharp/fundamentals/coding-style/identifier-names).
 
 | Element | Convention | Example |
 |---|---|---|
 | Namespace, class, struct, enum, delegate | PascalCase | `RPG2D.Exploration`, `PlayerController` |
-| Interface | I + PascalCase | `IInteractable` |
+| Interface | `I` + PascalCase | `IInteractable` |
 | Method, property, event | PascalCase | `MoveTo()`, `CurrentHealth` |
 | Constant | PascalCase | `DefaultMoveSpeed` |
-| Private/protected/internal field | _camelCase | `_moveSpeed` |
+| Private field | `_camelCase` | `_moveSpeed` |
 | Parameter and local variable | camelCase | `targetPosition` |
 | Generic type parameter | T-prefixed PascalCase | `TResult` |
 
-Use the primary class name as its C# file name. Keep namespaces aligned with feature/domain ownership. Avoid abbreviations unless widely understood.
+**Acronyms:** Follow Godot's two-character exception. Acronyms consisting of exactly two letters remain uppercase where PascalCase is expected and lowercase where camelCase is expected. Longer acronyms use normal PascalCase/camelCase.
+
+| Context | Correct | Incorrect |
+|---|---|---|
+| Type/member | `UIManager`, `UI` | `UiManager`, `Ui` |
+| Local/parameter | `uiManager`, `ui` | `uIManager`, `UIManager` |
+| Private field | `_uiManager` | `_UiManager` |
+| Identifier | `Id`, `PlayerId` | `ID`, `PlayerID` |
+| Longer acronym | `CpuParticles2D`, `HttpClient` | `CPUParticles2D`, `HTTPClient` |
+
+Use the primary class name as its C# file name. Keep namespaces aligned with feature/domain ownership. Do not shorten names when it reduces readability.
 
 ## Formatting and language
 - UTF-8, LF, four spaces, one final newline and Allman braces.
@@ -37,19 +47,21 @@ Use the primary class name as its C# file name. Keep namespaces aligned with fea
 
 ## Godot naming
 
-Godot's general guide recommends snake_case for folders and non-C# resources, PascalCase for nodes, and PascalCase C# files. This repository deliberately retains the existing RPG project's PascalCase convention for game-owned directories and file stems, to keep scenes, resources, scripts and tests consistent.
+Follow [Godot's project organization guide](https://docs.godotengine.org/en/4.7/tutorials/best_practices/project_organization.html):
 
 | Element | Convention | Example |
 |---|---|---|
-| Game-owned directory | PascalCase | `Scenes/Exploration/` |
-| C# script | PascalCase | `PlayerController.cs` |
-| Scene/resource file stem | PascalCase | `DormitoryRoom.tscn` |
-| Node name | PascalCase | `InteractionPrompt` |
-| Input action | snake_case | `move_left`, `interact` |
-| C# signal/event | Past-tense PascalCase | `InteractionCompleted` |
-| Godot sidecar | Engine-generated; do not rename manually | `.uid`, `.import` |
+| Game-owned directories | snake_case | `scenes/exploration/` |
+| Non-C# resource files | snake_case | `dormitory_room.tscn`, `player_portrait.png` |
+| C# script files | PascalCase, matching class | `PlayerController.cs` |
+| C# project files | PascalCase | `RPG2D.csproj` |
+| Godot node names | PascalCase | `InteractionPrompt`, `Camera2D` |
+| Input action names | snake_case | `move_left`, `interact` |
+| C# signals/events | Past-tense PascalCase | `InteractionCompleted` |
 
-Node paths, resource UIDs, signal names and input actions are compatibility-sensitive. Rename them only in a focused migration and update all references. Never rename third-party asset files as unrelated cleanup.
+Repository-maintenance areas retain their established names: `Docs/`, `Tools/`, `Tests/` and `.github/`. Third-party asset-pack paths are also preserved exactly; do not rename vendor files or directories as unrelated cleanup. These are repository-organization exceptions, not conventions for new game content.
+
+Godot sidecars such as `.uid` and `.import` are engine-managed; do not rename or edit them manually. Node paths, resource UIDs, signal names and input actions are compatibility-sensitive. Rename them only in a focused migration and update all references.
 
 ## Authored data
 - JSON property names use camelCase.
