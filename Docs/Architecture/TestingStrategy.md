@@ -53,7 +53,7 @@ For the initial player movement prototype, manually verify:
 - The collision body cannot pass through any arena boundary.
 - Camera2D follows the player without visible subpixel jitter.
 
-Use headless import/build/smoke checks where supported, but do not claim they replace manual playtesting.
+The CI workflow also launches the configured main scene headlessly for three frames after the C# build. This catches scene/resource startup failures, but does not prove interactive controls or collision feel. Use headless import/build/smoke checks where supported, but do not claim they replace manual playtesting.
 
 ## Local and CI validation
 
