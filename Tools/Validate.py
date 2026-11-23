@@ -37,6 +37,14 @@ def main():
     code = run(["dotnet", "test", "Tests/RPG2D.Tests.csproj", "--configuration", "Release"])
     if code:
         return code
+    for project in ("RPG2D.csproj", "Tests/RPG2D.Tests.csproj"):
+        code = run([
+            "dotnet", "format", "style", project,
+            "--no-restore", "--verify-no-changes",
+            "--diagnostics", "IDE1006", "--severity", "warn",
+        ])
+        if code:
+            return code
     print("\nAll configured validation checks passed.")
     return 0
 
