@@ -1,6 +1,6 @@
 # Project Structure
 
-The layout is intentionally small and feature-oriented. Folders provide homes for real work; they do not authorize creating every possible subsystem immediately.
+The layout is intentionally small and feature-oriented. Folders provide homes for real work; they do not authorize creating every possible subsystem immediately. Game-owned folders and non-C# resource files use Godot's recommended `snake_case`; C# files match their PascalCase class names.
 
 ## Repository tree
 
@@ -10,22 +10,22 @@ RPG-2D/
 │   ├── ISSUE_TEMPLATE/
 │   ├── workflows/
 │   └── PULL_REQUEST_TEMPLATE.md
-├── Assets/
-│   ├── Audio/
-│   ├── Characters/
-│   └── Environment/
-├── Data/
-│   └── World/
+├── assets/
+│   ├── audio/
+│   ├── characters/
+│   └── environment/
+├── data/
+│   └── world/
 ├── Docs/
 │   ├── Architecture/
 │   └── Design/
-├── Scenes/
-│   └── World/
-├── Scripts/
-│   ├── Bootstrap/
-│   └── Features/
-│       ├── Combat/
-│       └── Exploration/
+├── scenes/
+│   └── world/
+├── scripts/
+│   ├── bootstrap/
+│   └── features/
+│       ├── combat/
+│       └── exploration/
 ├── Tests/
 ├── Tools/
 │   └── Tests/
@@ -43,11 +43,11 @@ RPG-2D/
 
 | Folder | Responsibility |
 |---|---|
-| `Assets/` | Game-owned source art, audio and UI assets. Preserve the supplied third-party pack and license. |
-| `Data/` | Authored game content grouped by domain; stable IDs are separate from player-facing labels. |
-| `Scenes/` | Godot scenes grouped by player-facing feature or composition role. |
-| `Scripts/Bootstrap/` | Application entry point and top-level runtime composition. |
-| `Scripts/Features/` | Feature-owned gameplay and presentation code. |
+| `assets/` | Game-owned source art, audio and UI assets. Preserve the supplied third-party pack and license. |
+| `data/` | Authored game content grouped by domain; stable IDs are separate from player-facing labels. |
+| `scenes/` | Godot scenes grouped by player-facing feature or composition role. |
+| `scripts/bootstrap/` | Application entry point and top-level runtime composition. |
+| `scripts/features/` | Feature-owned gameplay and presentation code. |
 | `Tests/` | .NET tests for pure game/domain behavior and integration seams. |
 | `Tools/` | Repository validation and development utilities. |
 | `Tools/Tests/` | Python unit tests for repository tooling. |
@@ -56,4 +56,4 @@ RPG-2D/
 
 Keep scenes, scripts, data and assets separate by purpose. Keep feature-specific code near its feature. Shared code requires a real second consumer. Do not create empty classes, placeholder managers or generic abstractions to populate folders. The `.godot/` cache and generated build output must not be committed.
 
-See [Coding standards](CodingStandards.md) for naming and ownership rules, and [Testing strategy](TestingStrategy.md) for test placement.
+Use snake_case for scene/resource files (for example, `dormitory_room.tscn`) and PascalCase for C# files (for example, `PlayerController.cs`). Godot node names remain PascalCase. See [Coding standards](CodingStandards.md) for naming and ownership rules, and [Testing strategy](TestingStrategy.md) for test placement.
