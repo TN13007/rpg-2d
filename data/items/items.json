@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "items": [
+    {
+      "id": "health_potion",
+      "name": "Bình máu",
+      "description": "Hồi phục HP khi sử dụng.",
+      "stackable": true,
+      "maxStackSize": 20
+    },
+    {
+      "id": "iron_sword",
+      "name": "Kiếm sắt",
+      "description": "Một thanh kiếm sắt.",
+      "stackable": false,
+      "maxStackSize": 1
+    }
+  ]
+}

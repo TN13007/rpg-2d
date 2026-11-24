@@ -1,0 +1,196 @@
+using RPG2D.Features.PlayerData;
+using Xunit;
+
+namespace RPG2D.Tests
+{
+    public sealed class PlayerDataTests
+    {
+        private static ItemDefinition CreateStackableItem(int maxStackSize = 20)
+        {
+            return new ItemDefinition
+            {
+                Id = "health_potion",
+                Name = "Bình máu",
+                Stackable = true,
+                MaxStackSize = maxStackSize
+            };
+        }
+
+        private static ItemDefinition CreateNonStackableItem()
+        {
+            return new ItemDefinition
+            {
+                Id = "iron_sword",
+                Name = "Kiếm sắt",
+                Stackable = false,
+                MaxStackSize = 1
+            };
+        }
+
+        [Fact]
+        public void TryAddItem_WhenItemIsNew_AddsItToInventory()
+        {
+            PlayerData playerData = new();
+
+            bool added = playerData.TryAddItem(CreateNonStackableItem(), 1);
+
+            Assert.True(added);
+            Assert.Equal(1, playerData.GetItemQuantity("iron_sword"));
+            Assert.Single(playerData.Inventory);
+        }
+
+        [Fact]
+        public void TryAddItem_WhenStackExists_IncreasesItsQuantity()
+        {
+            PlayerData playerData = new();
+            ItemDefinition item = CreateStackableItem();
+
+            Assert.True(playerData.TryAddItem(item, 1));
+            Assert.True(playerData.TryAddItem(item, 2));
+
+            Assert.Equal(3, playerData.GetItemQuantity(item.Id));
+            Assert.Single(playerData.Inventory);
+            Assert.Equal(3, playerData.Inventory[0].Quantity);
+        }
+
+        [Fact]
+        public void TryAddItem_WhenQuantityExceedsStackLimit_FillsAndCreatesAnotherStack()
+        {
+            PlayerData playerData = new();
+            ItemDefinition item = CreateStackableItem();
+
+            Assert.True(playerData.TryAddItem(item, 19));
+            Assert.True(playerData.TryAddItem(item, 5));
+
+            Assert.Equal(24, playerData.GetItemQuantity(item.Id));
+            Assert.Equal(2, playerData.Inventory.Count);
+            Assert.Equal(20, playerData.Inventory[0].Quantity);
+            Assert.Equal(4, playerData.Inventory[1].Quantity);
+        }
+
+        [Fact]
+        public void TryAddItem_WhenItemIsNotStackable_CreatesOneStackPerItem()
+        {
+            PlayerData playerData = new();
+            ItemDefinition item = CreateNonStackableItem();
+
+            bool added = playerData.TryAddItem(item, 3);
+
+            Assert.True(added);
+            Assert.Equal(3, playerData.GetItemQuantity(item.Id));
+            Assert.Equal(3, playerData.Inventory.Count);
+            Assert.All(playerData.Inventory, stack => Assert.Equal(1, stack.Quantity));
+        }
+
+        [Fact]
+        public void HasItem_WhenQuantityIsAvailable_ReturnsTrue()
+        {
+            PlayerData playerData = new();
+            ItemDefinition item = CreateStackableItem();
+            Assert.True(playerData.TryAddItem(item, 3));
+
+            Assert.True(playerData.HasItem(item.Id));
+            Assert.True(playerData.HasItem(item.Id, 3));
+            Assert.False(playerData.HasItem(item.Id, 4));
+        }
+
+        [Fact]
+        public void TryRemoveItem_WhenQuantitySpansMultipleStacks_RemovesAcrossStacks()
+        {
+            PlayerData playerData = new();
+            ItemDefinition item = CreateStackableItem(5);
+            Assert.True(playerData.TryAddItem(item, 7));
+
+            bool removed = playerData.TryRemoveItem(item.Id, 6);
+
+            Assert.True(removed);
+            Assert.Equal(1, playerData.GetItemQuantity(item.Id));
+            Assert.Single(playerData.Inventory);
+            Assert.Equal(1, playerData.Inventory[0].Quantity);
+        }
+
+        [Fact]
+        public void TryRemoveItem_WhenQuantityIsInsufficient_DoesNotChangeInventory()
+        {
+            PlayerData playerData = new();
+            ItemDefinition item = CreateStackableItem();
+            Assert.True(playerData.TryAddItem(item, 3));
+
+            bool removed = playerData.TryRemoveItem(item.Id, 4);
+
+            Assert.False(removed);
+            Assert.Equal(3, playerData.GetItemQuantity(item.Id));
+            Assert.Single(playerData.Inventory);
+            Assert.Equal(3, playerData.Inventory[0].Quantity);
+        }
+
+        [Fact]
+        public void TryRemoveItem_WhenStackBecomesEmpty_RemovesTheStack()
+        {
+            PlayerData playerData = new();
+            ItemDefinition item = CreateStackableItem();
+            Assert.True(playerData.TryAddItem(item, 2));
+
+            bool removed = playerData.TryRemoveItem(item.Id, 2);
+
+            Assert.True(removed);
+            Assert.Empty(playerData.Inventory);
+            Assert.Equal(0, playerData.GetItemQuantity(item.Id));
+        }
+
+        [Theory]
+        [InlineData(0)]
+        [InlineData(-1)]
+        public void TryAddItem_WhenQuantityIsNotPositive_FailsWithoutChangingInventory(int quantity)
+        {
+            PlayerData playerData = new();
+
+            bool added = playerData.TryAddItem(CreateStackableItem(), quantity);
+
+            Assert.False(added);
+            Assert.Empty(playerData.Inventory);
+        }
+
+        [Fact]
+        public void TryAddItem_WhenDefinitionIsInvalid_FailsWithoutChangingInventory()
+        {
+            PlayerData playerData = new();
+            ItemDefinition invalidItem = new()
+            {
+                Id = "invalid_item",
+                Name = "Invalid",
+                Stackable = false,
+                MaxStackSize = 10
+            };
+
+            bool added = playerData.TryAddItem(invalidItem, 1);
+
+            Assert.False(added);
+            Assert.Empty(playerData.Inventory);
+        }
+
+        [Fact]
+        public void TryAddItem_WhenTotalQuantityWouldOverflow_FailsWithoutChangingInventory()
+        {
+            PlayerData playerData = new();
+            ItemDefinition item = CreateStackableItem(int.MaxValue);
+            Assert.True(playerData.TryAddItem(item, int.MaxValue));
+
+            bool added = playerData.TryAddItem(item, 1);
+
+            Assert.False(added);
+            Assert.Equal(int.MaxValue, playerData.GetItemQuantity(item.Id));
+            Assert.Single(playerData.Inventory);
+            Assert.Equal(int.MaxValue, playerData.Inventory[0].Quantity);
+        }
+
+        [Fact]
+        public void GetItemQuantity_IsCaseInsensitive()
+        {
+            PlayerData playerData = new();
+            Assert.True(playerData.TryAddItem(CreateStackableItem(), 2));
+
+            Assert.Equal(2, playerData.GetItemQuantity("HEALTH_POTION"));
+        }
+    }
+}
