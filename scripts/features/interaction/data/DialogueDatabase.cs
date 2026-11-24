@@ -9,8 +9,8 @@ namespace RPG2D.Features.Interaction.Data
 {
     public sealed class DialogueDatabase
     {
-        private const string _builtInManifestPath = "res://data/dialogues/dialogues.json";
-        private const string _modDirectoryPath = "user://mods/dialogues";
+        private const string BuiltInManifestPath = "res://data/dialogues/dialogues.json";
+        private const string ModDirectoryPath = "user://mods/dialogues";
 
         private static readonly JsonSerializerOptions _jsonOptions = new()
         {
