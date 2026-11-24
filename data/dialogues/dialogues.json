@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schemaVersion": 1,
   "dialogues": [
     {
       "id": "terminal_intro",
@@ -12,7 +12,7 @@
         { "id": "choice_4", "text": "Lựa chọn 4" },
         { "id": "choice_5", "text": "Lựa chọn 5" },
         { "id": "choice_6", "text": "Lựa chọn 6" },
-        { "id": "leave", "text": "Leave", "closes_interaction": true }
+        { "id": "leave", "text": "Leave", "closesInteraction": true }
       ]
     }
   ]
