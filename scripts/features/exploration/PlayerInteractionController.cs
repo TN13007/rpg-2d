@@ -29,7 +29,8 @@ namespace RPG2D.Features.Exploration
             ProcessMode = ProcessModeEnum.Always;
             _playerController = GetParent<PlayerController>();
             _dialogueDatabase = DialogueDatabase.Load();
-            _playerData = PlayerDataDatabase.Load();
+            ItemDatabase itemDatabase = ItemDatabase.Load();
+            _playerData = PlayerDataDatabase.Load(itemDatabase);
 
             _interactionUi = new TerminalInteractionUI();
             AddChild(_interactionUi);
@@ -38,7 +39,7 @@ namespace RPG2D.Features.Exploration
 
             _shopController = new ShopInteractionController();
             AddChild(_shopController);
-            _shopController.Configure(_playerData, ItemDatabase.Load());
+            _shopController.Configure(_playerData, itemDatabase);
             _shopController.LeaveRequested += ReturnToDialogueMenu;
         }
 
