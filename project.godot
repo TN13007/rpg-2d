@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="RPG 2D"
-run/main_scene="res://scenes/prototypes/player_movement_test.tscn"
+run/main_scene="res://scenes/prototypes/terminal_interaction_test.tscn"
 config/features=PackedStringArray("4.7", "C#", "Forward Plus")
 config/icon="res://icon.svg"
 
