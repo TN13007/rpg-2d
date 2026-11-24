@@ -1,11 +1,8 @@
 {
+  "currency": 1000,
   "inventory": [
     {
-      "itemId": "health_potion",
-      "quantity": 1
-    },
-    {
-      "itemId": "iron_sword",
+      "itemId": "item_a",
       "quantity": 1
     }
   ]
