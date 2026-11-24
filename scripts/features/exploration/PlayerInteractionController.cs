@@ -12,6 +12,7 @@ namespace RPG2D.Features.Exploration
         private TerminalController? _currentTerminal;
         private TerminalInteractionUI _interactionUi = null!;
         private DialogueDatabase _dialogueDatabase = null!;
+        private DialogueDefinition? _currentDialogue;
         private IReadOnlyList<DialogueChoiceDefinition> _choiceOptions =
             Array.Empty<DialogueChoiceDefinition>();
 
@@ -135,6 +136,12 @@ namespace RPG2D.Features.Exploration
 
         private void ConfirmSelection()
         {
+            if (_choiceOptions.Count == 0)
+            {
+                AdvanceDialogue();
+                return;
+            }
+
             if (_selectedChoiceIndex < 0 ||
                 _selectedChoiceIndex >= _choiceOptions.Count)
             {
@@ -149,7 +156,24 @@ namespace RPG2D.Features.Exploration
                 return;
             }
 
+            if (!string.IsNullOrWhiteSpace(choice.NextDialogueId))
+            {
+                ShowDialogue(choice.NextDialogueId);
+                return;
+            }
+
             _interactionUi.SetFeedback($"Bạn chọn: {choice.Text}");
+        }
+
+        private void AdvanceDialogue()
+        {
+            if (_currentDialogue == null ||
+                string.IsNullOrWhiteSpace(_currentDialogue.NextDialogueId))
+            {
+                return;
+            }
+
+            ShowDialogue(_currentDialogue.NextDialogueId);
         }
 
         private void OpenInteraction()
@@ -169,9 +193,28 @@ namespace RPG2D.Features.Exploration
                 return;
             }
 
+            _isInteractionOpen = true;
+            ShowDialogue(dialogue);
+            _interactionUi.SetPromptVisible(false);
+            _playerController.SetPhysicsProcess(false);
+        }
+
+        private void ShowDialogue(string dialogueId)
+        {
+            if (!_dialogueDatabase.TryGetDialogue(dialogueId, out DialogueDefinition dialogue))
+            {
+                GD.PushWarning($"Dialogue references missing nextDialogueId '{dialogueId}'.");
+                return;
+            }
+
+            ShowDialogue(dialogue);
+        }
+
+        private void ShowDialogue(DialogueDefinition dialogue)
+        {
+            _currentDialogue = dialogue;
             _choiceOptions = dialogue.Choices;
             _selectedChoiceIndex = 0;
-            _isInteractionOpen = true;
 
             List<string> choiceTexts = new();
             foreach (DialogueChoiceDefinition choice in _choiceOptions)
@@ -185,13 +228,12 @@ namespace RPG2D.Features.Exploration
                 choiceTexts,
                 _selectedChoiceIndex
             );
-            _interactionUi.SetPromptVisible(false);
-            _playerController.SetPhysicsProcess(false);
         }
 
         private void CloseInteraction()
         {
             _isInteractionOpen = false;
+            _currentDialogue = null;
             _choiceOptions = Array.Empty<DialogueChoiceDefinition>();
             _interactionUi.HideInteraction();
             _playerController.SetPhysicsProcess(true);
