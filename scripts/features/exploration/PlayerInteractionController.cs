@@ -9,11 +9,13 @@ namespace RPG2D.Features.Exploration
         private TerminalController? _currentTerminal;
         private CanvasLayer _ui = null!;
         private Label _promptLabel = null!;
-        private PanelContainer _messagePanel = null!;
+        private PanelContainer _interactionPanel = null!;
         private Label _titleLabel = null!;
         private Label _messageLabel = null!;
+        private Label _choicesLabel = null!;
+        private Label _feedbackLabel = null!;
         private Label _closeHintLabel = null!;
-        private bool _isMessageOpen;
+        private bool _isInteractionOpen;
 
         public override void _Ready()
         {
@@ -24,20 +26,15 @@ namespace RPG2D.Features.Exploration
 
         public override void _Process(double delta)
         {
-            if (_isMessageOpen)
+            if (_isInteractionOpen)
             {
-                if (Input.IsActionJustPressed("interact") ||
-                    Input.IsActionJustPressed("ui_cancel"))
-                {
-                    CloseMessage();
-                }
-
+                HandleInteractionInput();
                 return;
             }
 
             if (_currentTerminal != null && Input.IsActionJustPressed("interact"))
             {
-                OpenMessage();
+                OpenInteraction();
             }
         }
 
@@ -45,7 +42,7 @@ namespace RPG2D.Features.Exploration
         {
             _currentTerminal = terminal;
 
-            if (!_isMessageOpen)
+            if (!_isInteractionOpen)
             {
                 _promptLabel.Visible = true;
             }
@@ -60,31 +57,69 @@ namespace RPG2D.Features.Exploration
 
             _currentTerminal = null;
 
-            if (!_isMessageOpen)
+            if (!_isInteractionOpen)
             {
                 _promptLabel.Visible = false;
             }
         }
 
-        private void OpenMessage()
+        private void HandleInteractionInput()
+        {
+            if (Input.IsActionJustPressed("ui_cancel"))
+            {
+                CloseInteraction();
+                return;
+            }
+
+            if (Input.IsActionJustPressed("interaction_choice_1"))
+            {
+                ShowChoiceResult(1);
+                return;
+            }
+
+            if (Input.IsActionJustPressed("interaction_choice_2"))
+            {
+                ShowChoiceResult(2);
+                return;
+            }
+
+            if (Input.IsActionJustPressed("interaction_choice_3"))
+            {
+                ShowChoiceResult(3);
+                return;
+            }
+
+            if (Input.IsActionJustPressed("interaction_leave"))
+            {
+                CloseInteraction();
+            }
+        }
+
+        private void OpenInteraction()
         {
             if (_currentTerminal == null)
             {
                 return;
             }
 
-            _isMessageOpen = true;
+            _isInteractionOpen = true;
             _titleLabel.Text = _currentTerminal.DisplayName;
             _messageLabel.Text = _currentTerminal.Response;
+            _feedbackLabel.Text = string.Empty;
             _promptLabel.Visible = false;
-            _messagePanel.Visible = true;
+            _interactionPanel.Visible = true;
             _playerController.SetPhysicsProcess(false);
         }
 
-        private void CloseMessage()
+        private void ShowChoiceResult(int choice)
         {
-            _isMessageOpen = false;
-            _messagePanel.Visible = false;
+            _feedbackLabel.Text = $"Bạn chọn số {choice}";
+        }
+
+        private void CloseInteraction()
+        {
+            _isInteractionOpen = false;
+            _interactionPanel.Visible = false;
             _playerController.SetPhysicsProcess(true);
             _promptLabel.Visible = _currentTerminal != null;
         }
@@ -106,21 +141,21 @@ namespace RPG2D.Features.Exploration
             _promptLabel.Size = new Vector2(140, 32);
             _ui.AddChild(_promptLabel);
 
-            _messagePanel = new PanelContainer
+            _interactionPanel = new PanelContainer
             {
                 Visible = false,
                 AnchorLeft = 0.15f,
                 AnchorTop = 1.0f,
                 AnchorRight = 0.85f,
                 AnchorBottom = 1.0f,
-                OffsetTop = -170,
+                OffsetTop = -220,
                 OffsetBottom = -24
             };
-            _ui.AddChild(_messagePanel);
+            _ui.AddChild(_interactionPanel);
 
             VBoxContainer content = new VBoxContainer();
             content.AddThemeConstantOverride("separation", 8);
-            _messagePanel.AddChild(content);
+            _interactionPanel.AddChild(content);
 
             _titleLabel = new Label
             {
@@ -136,9 +171,22 @@ namespace RPG2D.Features.Exploration
             };
             content.AddChild(_messageLabel);
 
+            _choicesLabel = new Label
+            {
+                Text = "1 — Lựa chọn 1\n2 — Lựa chọn 2\n3 — Lựa chọn 3\n4 — Leave"
+            };
+            content.AddChild(_choicesLabel);
+
+            _feedbackLabel = new Label
+            {
+                Text = string.Empty,
+                AutowrapMode = TextServer.AutowrapMode.WordSmart
+            };
+            content.AddChild(_feedbackLabel);
+
             _closeHintLabel = new Label
             {
-                Text = "E / Esc — Close",
+                Text = "4 — Leave     Esc — Close",
                 HorizontalAlignment = HorizontalAlignment.Right
             };
             content.AddChild(_closeHintLabel);
