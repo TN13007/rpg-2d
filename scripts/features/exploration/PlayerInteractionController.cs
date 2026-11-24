@@ -5,6 +5,7 @@ using RPG2D.Features.Interaction;
 using RPG2D.Features.Interaction.Data;
 using RPG2D.Features.PlayerData;
 using RPG2D.Features.Shop;
+using PlayerDataState = RPG2D.Features.PlayerData.PlayerData;
 
 namespace RPG2D.Features.Exploration
 {
@@ -14,7 +15,7 @@ namespace RPG2D.Features.Exploration
         private TerminalController? _currentTerminal;
         private TerminalInteractionUI _interactionUi = null!;
         private DialogueDatabase _dialogueDatabase = null!;
-        private PlayerData _playerData = null!;
+        private PlayerDataState _playerData = null!;
         private ShopInteractionController _shopController = null!;
         private DialogueDefinition? _currentDialogue;
         private IReadOnlyList<DialogueChoiceDefinition> _choiceOptions =

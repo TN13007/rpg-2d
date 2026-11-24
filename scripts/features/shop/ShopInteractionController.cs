@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Godot;
 using RPG2D.Features.PlayerData;
+using PlayerDataState = RPG2D.Features.PlayerData.PlayerData;
 
 namespace RPG2D.Features.Shop
 {
@@ -9,7 +10,7 @@ namespace RPG2D.Features.Shop
     {
         public event Action? LeaveRequested;
 
-        private PlayerData _playerData = null!;
+        private PlayerDataState _playerData = null!;
         private ItemDatabase _itemDatabase = null!;
         private ShopInteractionUI _shopUi = null!;
         private ShopDefinition? _shop;
@@ -26,7 +27,7 @@ namespace RPG2D.Features.Shop
             _shopUi.ItemConfirmed += OnItemConfirmed;
         }
 
-        public void Configure(PlayerData playerData, ItemDatabase itemDatabase)
+        public void Configure(PlayerDataState playerData, ItemDatabase itemDatabase)
         {
             _playerData = playerData;
             _itemDatabase = itemDatabase;
