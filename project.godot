@@ -32,22 +32,6 @@ interact={
 "deadzone": 0.2,
 "events": [Object(InputEventKey,"physical_keycode":69)]
 }
-interaction_choice_1={
-"deadzone": 0.2,
-"events": [Object(InputEventKey,"physical_keycode":49)]
-}
-interaction_choice_2={
-"deadzone": 0.2,
-"events": [Object(InputEventKey,"physical_keycode":50)]
-}
-interaction_choice_3={
-"deadzone": 0.2,
-"events": [Object(InputEventKey,"physical_keycode":51)]
-}
-interaction_leave={
-"deadzone": 0.2,
-"events": [Object(InputEventKey,"physical_keycode":52)]
-}
 
 [display]
 
