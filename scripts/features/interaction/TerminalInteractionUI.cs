@@ -158,7 +158,7 @@ namespace RPG2D.Features.Interaction
 
             Label closeHintLabel = new Label
             {
-                Text = "W / S — Di chuyển     Space — Chọn     Esc — Đóng",
+                Text = "W / S — Di chuyển     Space — Chọn / Tiếp tục     Esc — Đóng",
                 HorizontalAlignment = HorizontalAlignment.Right,
                 AutowrapMode = TextServer.AutowrapMode.WordSmart
             };
