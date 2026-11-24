@@ -4,7 +4,7 @@ This project uses Godot 4.7.2 .NET / C#. Follow [Coding standards](Docs/Architec
 
 ## Start with task context
 
-1. Read the active GitHub Issue and related PRs. Latest `main` is the implemented baseline; open PRs are proposals.
+1. Read the active GitHub Issue and related PRs. Latest `main` is the implemented baseline; open or unmerged PRs are proposals.
 2. Read [WORKFLOW.md](WORKFLOW.md) for status, blockers and handoff.
 3. Read relevant documents under [Docs/Design](Docs/Design/README.md) and [Docs/Architecture](Docs/Architecture/ProjectStructure.md).
 4. Read [CONTRIBUTING.md](CONTRIBUTING.md) before creating Issues, branches, commits or PRs.
@@ -30,7 +30,7 @@ If documentation and implementation disagree, report the mismatch and verify aga
 - Do not add managers, interfaces, factories, repositories, service locators or universal executors pre-emptively.
 - Do not create architecture layers solely to mirror folders.
 - Preserve scene paths, resource references, input actions and serialized IDs unless a focused migration requires changing them.
-- Do not reorganize the third-party asset pack as unrelated cleanup.
+- Do not reorganize the third-party asset pack as unrelated cleanup. A dedicated import task may place vendor files under the appropriate `assets/<category>/ninja_adventure/` folders, but must preserve original asset bytes, upstream internal names and license/source information.
 - Avoid broad refactors and generated-file churn. Keep each PR focused on its Issue.
 - Do not add an abstraction until a real second use case or clear complexity reduction justifies it.
 

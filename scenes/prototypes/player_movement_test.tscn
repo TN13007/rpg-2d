@@ -1,0 +1,66 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/characters/player.tscn" id="1_player"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_horizontal_wall"]
+size = Vector2(660, 20)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_vertical_wall"]
+size = Vector2(20, 380)
+
+[node name="PlayerMovementTest" type="Node2D"]
+
+[node name="Floor" type="Polygon2D" parent="."]
+polygon = PackedVector2Array(-320, -180, 320, -180, 320, 180, -320, 180)
+color = Color(0.16, 0.22, 0.19, 1)
+
+[node name="NorthWall" type="StaticBody2D" parent="."]
+position = Vector2(0, -190)
+collision_layer = 1
+collision_mask = 1
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="NorthWall"]
+shape = SubResource("RectangleShape2D_horizontal_wall")
+
+[node name="Visual" type="Polygon2D" parent="NorthWall"]
+polygon = PackedVector2Array(-330, -10, 330, -10, 330, 10, -330, 10)
+color = Color(0.32, 0.35, 0.33, 1)
+
+[node name="SouthWall" type="StaticBody2D" parent="."]
+position = Vector2(0, 190)
+collision_layer = 1
+collision_mask = 1
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="SouthWall"]
+shape = SubResource("RectangleShape2D_horizontal_wall")
+
+[node name="Visual" type="Polygon2D" parent="SouthWall"]
+polygon = PackedVector2Array(-330, -10, 330, -10, 330, 10, -330, 10)
+color = Color(0.32, 0.35, 0.33, 1)
+
+[node name="WestWall" type="StaticBody2D" parent="."]
+position = Vector2(-330, 0)
+collision_layer = 1
+collision_mask = 1
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WestWall"]
+shape = SubResource("RectangleShape2D_vertical_wall")
+
+[node name="Visual" type="Polygon2D" parent="WestWall"]
+polygon = PackedVector2Array(-10, -190, 10, -190, 10, 190, -10, 190)
+color = Color(0.32, 0.35, 0.33, 1)
+
+[node name="EastWall" type="StaticBody2D" parent="."]
+position = Vector2(330, 0)
+collision_layer = 1
+collision_mask = 1
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="EastWall"]
+shape = SubResource("RectangleShape2D_vertical_wall")
+
+[node name="Visual" type="Polygon2D" parent="EastWall"]
+polygon = PackedVector2Array(-10, -190, 10, -190, 10, 190, -10, 190)
+color = Color(0.32, 0.35, 0.33, 1)
+
+[node name="Player" parent="." instance=ExtResource("1_player")]
+position = Vector2(0, 0)

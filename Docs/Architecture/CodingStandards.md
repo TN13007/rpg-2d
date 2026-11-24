@@ -59,7 +59,7 @@ Follow [Godot's project organization guide](https://docs.godotengine.org/en/4.7/
 | Input action names | snake_case | `move_left`, `interact` |
 | C# signals/events | Past-tense PascalCase | `InteractionCompleted` |
 
-Repository-maintenance areas retain their established names: `Docs/`, `Tools/`, `Tests/` and `.github/`. Third-party asset-pack paths are also preserved exactly; do not rename vendor files or directories as unrelated cleanup. These are repository-organization exceptions, not conventions for new game content.
+Repository-maintenance areas retain their established names: `Docs/`, `Tools/`, `Tests/` and `.github/`. Imported Ninja Adventure assets are grouped under `assets/<category>/ninja_adventure/`. The project-owned category and vendor marker use snake_case; everything beneath the vendor marker preserves the upstream folder names and filenames exactly. This avoids changing asset identity or breaking any references while keeping imported files visibly separate from project-authored assets. The original CC0 license and source README are retained under `assets/licenses/ninja_adventure/` and `assets/reference/ninja_adventure/`.
 
 Godot sidecars such as `.uid` and `.import` are engine-managed; do not rename or edit them manually. Node paths, resource UIDs, signal names and input actions are compatibility-sensitive. Rename them only in a focused migration and update all references.
 

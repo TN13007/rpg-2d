@@ -45,7 +45,15 @@ When a change affects scenes, nodes, resources, signals, input, collision, anima
 - Check Output and Debugger for errors and warnings.
 - Record what was manually exercised and what remains untested.
 
-Use headless import/build/smoke checks where supported, but do not claim they replace manual playtesting.
+For the initial player movement prototype, manually verify:
+- WASD and arrow keys move in all four directions.
+- Diagonal movement is not faster than cardinal movement.
+- The player keeps facing the last movement direction while idle.
+- Walk frames animate and return to the idle frame when input stops.
+- The collision body cannot pass through any arena boundary.
+- Camera2D follows the player without visible subpixel jitter.
+
+The CI workflow also launches the configured main scene headlessly for three frames after the C# build. This catches scene/resource startup failures, but does not prove interactive controls or collision feel. Use headless import/build/smoke checks where supported, but do not claim they replace manual playtesting.
 
 ## Local and CI validation
 

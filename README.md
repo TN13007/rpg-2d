@@ -2,6 +2,18 @@
 
 A Godot 4.7.2 .NET / C# 2D RPG focused on spatial exploration, everyday student-life activities, supernatural mysteries and turn-based encounters.
 
+## Run the current prototype
+
+Open the project in Godot 4.7.2 .NET and run the project (F6 runs the current scene; F5 runs the configured main scene).
+
+- **Move:** WASD or arrow keys.
+- **Movement:** four directions with normalized diagonal speed.
+- **Character:** the Ninja Adventure Boy sprite, with directional idle and walk frames.
+- **Camera:** follows the player.
+- **Collision:** the player is blocked by the test arena walls.
+
+The current main scene is `scenes/prototypes/player_movement_test.tscn`. The reusable player scene is `scenes/characters/player.tscn`.
+
 ## Project navigation
 
 - [Design](Docs/Design/README.md) — intended player experience and accepted gameplay decisions.

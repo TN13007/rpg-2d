@@ -44,6 +44,15 @@ class NamingTests(unittest.TestCase):
         self.assertEqual([], naming.validate_path("Docs/Architecture/CodingStandards.md"))
         self.assertEqual([], naming.validate_path("Tools/CheckProjectNaming.py"))
 
+    def test_vendor_asset_paths_preserve_upstream_names(self):
+        self.assertEqual([], naming.validate_path(
+            "assets/characters/ninja_adventure/characters/Boy/SpriteSheet.png"
+        ))
+        self.assertEqual([], naming.validate_path(
+            "assets/audio/ninja_adventure/Musics/1 - Adventure Begin.ogg"
+        ))
+        self.assertTrue(naming.validate_path("assets/Characters/ninja_adventure/characters/Boy/SpriteSheet.png"))
+
     def test_json_property_and_id_conventions(self):
         with tempfile.TemporaryDirectory() as folder:
             path = Path(folder) / "content.json"
