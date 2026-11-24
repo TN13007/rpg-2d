@@ -145,7 +145,7 @@ namespace RPG2D.Features.Interaction.Data
 
         public sealed class DialogueManifest
         {
-            [JsonPropertyName("schema_version")]
+            [JsonPropertyName("schemaVersion")]
             public int SchemaVersion { get; set; }
 
             [JsonPropertyName("dialogues")]
