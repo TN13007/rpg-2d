@@ -1,37 +1,19 @@
+using System;
 using System.Collections.Generic;
 using Godot;
 using RPG2D.Features.Interaction;
+using RPG2D.Features.Interaction.Data;
 
 namespace RPG2D.Features.Exploration
 {
     public partial class PlayerInteractionController : Node
     {
-        private sealed class ChoiceDefinition
-        {
-            public string Text { get; }
-            public bool ClosesInteraction { get; }
-
-            public ChoiceDefinition(string text, bool closesInteraction = false)
-            {
-                Text = text;
-                ClosesInteraction = closesInteraction;
-            }
-        }
-
         private PlayerController _playerController = null!;
         private TerminalController? _currentTerminal;
         private TerminalInteractionUI _interactionUi = null!;
-
-        private readonly List<ChoiceDefinition> _choiceOptions = new()
-        {
-            new ChoiceDefinition("Lựa chọn 1"),
-            new ChoiceDefinition("Lựa chọn 2"),
-            new ChoiceDefinition("Lựa chọn 3"),
-            new ChoiceDefinition("Lựa chọn 4"),
-            new ChoiceDefinition("Lựa chọn 5"),
-            new ChoiceDefinition("Lựa chọn 6"),
-            new ChoiceDefinition("Leave", true)
-        };
+        private DialogueDatabase _dialogueDatabase = null!;
+        private IReadOnlyList<DialogueChoiceDefinition> _choiceOptions =
+            Array.Empty<DialogueChoiceDefinition>();
 
         private int _selectedChoiceIndex;
         private bool _isInteractionOpen;
@@ -40,6 +22,7 @@ namespace RPG2D.Features.Exploration
         {
             ProcessMode = ProcessModeEnum.Always;
             _playerController = GetParent<PlayerController>();
+            _dialogueDatabase = DialogueDatabase.Load();
 
             _interactionUi = new TerminalInteractionUI();
             AddChild(_interactionUi);
@@ -141,12 +124,13 @@ namespace RPG2D.Features.Exploration
 
         private void OnChoiceConfirmed(int index)
         {
-            SelectChoice(index);
-
-            if (index >= 0 && index < _choiceOptions.Count)
+            if (index < 0 || index >= _choiceOptions.Count)
             {
-                ConfirmSelection();
+                return;
             }
+
+            SelectChoice(index);
+            ConfirmSelection();
         }
 
         private void ConfirmSelection()
@@ -157,13 +141,15 @@ namespace RPG2D.Features.Exploration
                 return;
             }
 
-            if (_choiceOptions[_selectedChoiceIndex].ClosesInteraction)
+            DialogueChoiceDefinition choice = _choiceOptions[_selectedChoiceIndex];
+
+            if (choice.ClosesInteraction)
             {
                 CloseInteraction();
                 return;
             }
 
-            _interactionUi.SetFeedback($"Bạn chọn số {_selectedChoiceIndex + 1}");
+            _interactionUi.SetFeedback($"Bạn chọn: {choice.Text}");
         }
 
         private void OpenInteraction()
@@ -173,18 +159,29 @@ namespace RPG2D.Features.Exploration
                 return;
             }
 
-            _isInteractionOpen = true;
+            if (!_dialogueDatabase.TryGetDialogue(
+                _currentTerminal.DialogueId,
+                out DialogueDefinition dialogue))
+            {
+                GD.PushWarning(
+                    $"Terminal '{_currentTerminal.Name}' references missing dialogue ID '{_currentTerminal.DialogueId}'."
+                );
+                return;
+            }
+
+            _choiceOptions = dialogue.Choices;
             _selectedChoiceIndex = 0;
+            _isInteractionOpen = true;
 
             List<string> choiceTexts = new();
-            foreach (ChoiceDefinition option in _choiceOptions)
+            foreach (DialogueChoiceDefinition choice in _choiceOptions)
             {
-                choiceTexts.Add(option.Text);
+                choiceTexts.Add(choice.Text);
             }
 
             _interactionUi.ShowInteraction(
-                _currentTerminal.DisplayName,
-                _currentTerminal.Response,
+                dialogue.Title,
+                dialogue.Message,
                 choiceTexts,
                 _selectedChoiceIndex
             );
@@ -195,6 +192,7 @@ namespace RPG2D.Features.Exploration
         private void CloseInteraction()
         {
             _isInteractionOpen = false;
+            _choiceOptions = Array.Empty<DialogueChoiceDefinition>();
             _interactionUi.HideInteraction();
             _playerController.SetPhysicsProcess(true);
             _interactionUi.SetPromptVisible(_currentTerminal != null);
