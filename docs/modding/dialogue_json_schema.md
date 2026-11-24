@@ -18,11 +18,12 @@ Each file must contain a manifest with `schemaVersion` set to `1` and a `dialogu
     {
       "id": "terminal_intro",
       "title": "Terminal",
-      "message": "System online. No new messages.",
+      "message": "System online.",
       "choices": [
         {
-          "id": "status",
-          "text": "Check system status"
+          "id": "open_status",
+          "text": "Check system status",
+          "nextDialogueId": "terminal_status"
         },
         {
           "id": "leave",
@@ -30,6 +31,13 @@ Each file must contain a manifest with `schemaVersion` set to `1` and a `dialogu
           "closesInteraction": true
         }
       ]
+    },
+    {
+      "id": "terminal_status",
+      "title": "System status",
+      "message": "All systems operational. Press Space to return.",
+      "choices": [],
+      "nextDialogueId": "terminal_intro"
     }
   ]
 }
@@ -45,9 +53,13 @@ Each file must contain a manifest with `schemaVersion` set to `1` and a `dialogu
 | `title` | string | Yes | Title shown by the interaction UI. |
 | `message` | string | Yes | Main dialogue text. |
 | `choices` | array | Yes | Choices shown to the player; an empty array is allowed. |
+| `nextDialogueId` | string | No | Dialogue shown when Space is pressed on a page with no choices. |
 | `choices[].id` | string | Yes | Unique choice identifier within its dialogue. |
 | `choices[].text` | string | Yes | Text shown for the choice. |
 | `choices[].closesInteraction` | boolean | No | When true, selecting the choice closes the interaction. Defaults to false. |
+| `choices[].nextDialogueId` | string | No | Dialogue shown after selecting this choice. |
+ 
+A dialogue with no choices can use `nextDialogueId` to create a sequence of pages advanced with Space. A choice can use `nextDialogueId` to branch to another dialogue. A terminal page can point back to the menu dialogue to return to its choices.
 
 ## Loading and overrides
 
@@ -55,27 +67,8 @@ Built-in dialogues load first. Mod files load afterward in alphabetical filename
 
 Different mod files that define the same ID are resolved by alphabetical filename order: the later file wins. Use unique IDs to avoid accidental conflicts.
 
-Invalid JSON files and invalid dialogue entries are skipped with a warning in the Godot output. The game does not execute code from JSON. Dialogue JSON currently controls display text, choice order, and the close-interaction behavior only.
+Invalid JSON files and invalid dialogue entries are skipped with a warning in the Godot output. The game does not execute code from JSON. Dialogue JSON controls display text, choice order, navigation links, and the close-interaction behavior only.
 
 ## Example mod
 
-Create a file such as `my_terminal_overhaul.json` in `user://mods/dialogues/`:
-
-```json
-{
-  "schemaVersion": 1,
-  "dialogues": [
-    {
-      "id": "terminal_intro",
-      "title": "Maintenance Console",
-      "message": "Choose a maintenance operation.",
-      "choices": [
-        { "id": "diagnostics", "text": "Run diagnostics" },
-        { "id": "shutdown", "text": "Shut down", "closesInteraction": true }
-      ]
-    }
-  ]
-}
-```
-
-Restart the game to load the mod. The built-in terminal uses the `terminal_intro` ID by default.
+Create a file such as `my_terminal_overhaul.json` in `user://mods/dialogues/`. Use the same `schemaVersion` and dialogue structure shown above. Restart the game to load the mod. The built-in terminal uses the `terminal_intro` ID by default.
