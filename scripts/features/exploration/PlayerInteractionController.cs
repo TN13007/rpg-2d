@@ -12,9 +12,12 @@ namespace RPG2D.Features.Exploration
         private PanelContainer _interactionPanel = null!;
         private Label _titleLabel = null!;
         private Label _messageLabel = null!;
-        private Label _choicesLabel = null!;
         private Label _feedbackLabel = null!;
         private Label _closeHintLabel = null!;
+        private readonly PanelContainer[] _choiceRows = new PanelContainer[4];
+        private readonly Label[] _choiceCursorLabels = new Label[4];
+        private readonly Label[] _choiceOptionLabels = new Label[4];
+        private int _selectedChoiceIndex;
         private bool _isInteractionOpen;
 
         public override void _Ready()
@@ -71,28 +74,39 @@ namespace RPG2D.Features.Exploration
                 return;
             }
 
-            if (Input.IsActionJustPressed("interaction_choice_1"))
+            if (Input.IsActionJustPressed("ui_up"))
             {
-                ShowChoiceResult(1);
+                MoveSelection(-1);
                 return;
             }
 
-            if (Input.IsActionJustPressed("interaction_choice_2"))
+            if (Input.IsActionJustPressed("ui_down"))
             {
-                ShowChoiceResult(2);
+                MoveSelection(1);
                 return;
             }
 
-            if (Input.IsActionJustPressed("interaction_choice_3"))
+            if (Input.IsActionJustPressed("ui_accept"))
             {
-                ShowChoiceResult(3);
-                return;
+                ConfirmSelection();
             }
+        }
 
-            if (Input.IsActionJustPressed("interaction_leave"))
+        private void MoveSelection(int direction)
+        {
+            _selectedChoiceIndex = (_selectedChoiceIndex + direction + _choiceRows.Length) % _choiceRows.Length;
+            UpdateSelectionVisuals();
+        }
+
+        private void ConfirmSelection()
+        {
+            if (_selectedChoiceIndex == 3)
             {
                 CloseInteraction();
+                return;
             }
+
+            _feedbackLabel.Text = $"Bạn chọn số {_selectedChoiceIndex + 1}";
         }
 
         private void OpenInteraction()
@@ -106,14 +120,11 @@ namespace RPG2D.Features.Exploration
             _titleLabel.Text = _currentTerminal.DisplayName;
             _messageLabel.Text = _currentTerminal.Response;
             _feedbackLabel.Text = string.Empty;
+            _selectedChoiceIndex = 0;
+            UpdateSelectionVisuals();
             _promptLabel.Visible = false;
             _interactionPanel.Visible = true;
             _playerController.SetPhysicsProcess(false);
-        }
-
-        private void ShowChoiceResult(int choice)
-        {
-            _feedbackLabel.Text = $"Bạn chọn số {choice}";
         }
 
         private void CloseInteraction()
@@ -148,7 +159,7 @@ namespace RPG2D.Features.Exploration
                 AnchorTop = 1.0f,
                 AnchorRight = 0.85f,
                 AnchorBottom = 1.0f,
-                OffsetTop = -220,
+                OffsetTop = -260,
                 OffsetBottom = -24
             };
             _ui.AddChild(_interactionPanel);
@@ -171,11 +182,14 @@ namespace RPG2D.Features.Exploration
             };
             content.AddChild(_messageLabel);
 
-            _choicesLabel = new Label
-            {
-                Text = "1 — Lựa chọn 1\n2 — Lựa chọn 2\n3 — Lựa chọn 3\n4 — Leave"
-            };
-            content.AddChild(_choicesLabel);
+            VBoxContainer choicesContainer = new VBoxContainer();
+            choicesContainer.AddThemeConstantOverride("separation", 4);
+            content.AddChild(choicesContainer);
+
+            CreateChoiceRow(choicesContainer, 0, "Lựa chọn 1");
+            CreateChoiceRow(choicesContainer, 1, "Lựa chọn 2");
+            CreateChoiceRow(choicesContainer, 2, "Lựa chọn 3");
+            CreateChoiceRow(choicesContainer, 3, "Leave");
 
             _feedbackLabel = new Label
             {
@@ -186,10 +200,76 @@ namespace RPG2D.Features.Exploration
 
             _closeHintLabel = new Label
             {
-                Text = "4 — Leave     Esc — Close",
+                Text = "↑ / ↓ Di chuyển     Enter — Chọn     Esc — Đóng",
                 HorizontalAlignment = HorizontalAlignment.Right
             };
             content.AddChild(_closeHintLabel);
+
+            UpdateSelectionVisuals();
+        }
+
+        private void CreateChoiceRow(VBoxContainer parent, int index, string optionText)
+        {
+            PanelContainer row = new PanelContainer
+            {
+                CustomMinimumSize = new Vector2(0, 34)
+            };
+            parent.AddChild(row);
+            _choiceRows[index] = row;
+
+            HBoxContainer rowContent = new HBoxContainer();
+            rowContent.AddThemeConstantOverride("separation", 8);
+            row.AddChild(rowContent);
+
+            Label cursorLabel = new Label
+            {
+                Text = string.Empty,
+                CustomMinimumSize = new Vector2(24, 0),
+                VerticalAlignment = VerticalAlignment.Center,
+                HorizontalAlignment = HorizontalAlignment.Center
+            };
+            rowContent.AddChild(cursorLabel);
+            _choiceCursorLabels[index] = cursorLabel;
+
+            Label optionLabel = new Label
+            {
+                Text = optionText,
+                VerticalAlignment = VerticalAlignment.Center,
+                SizeFlagsHorizontal = Control.SizeFlags.ExpandFill
+            };
+            rowContent.AddChild(optionLabel);
+            _choiceOptionLabels[index] = optionLabel;
+        }
+
+        private void UpdateSelectionVisuals()
+        {
+            for (int i = 0; i < _choiceRows.Length; i++)
+            {
+                bool isSelected = i == _selectedChoiceIndex;
+
+                StyleBoxFlat style = new StyleBoxFlat
+                {
+                    BgColor = isSelected
+                        ? new Color(0.08f, 0.25f, 0.30f, 1.0f)
+                        : new Color(0.06f, 0.07f, 0.09f, 0.65f),
+                    BorderColor = isSelected
+                        ? new Color(0.25f, 0.90f, 1.0f, 1.0f)
+                        : new Color(0.20f, 0.22f, 0.26f, 0.55f)
+                };
+                style.SetBorderWidthAll(isSelected ? 2 : 1);
+                style.SetCornerRadiusAll(4);
+
+                _choiceRows[i].AddThemeStyleboxOverride("panel", style);
+                _choiceCursorLabels[i].Text = isSelected ? "▶" : string.Empty;
+                _choiceCursorLabels[i].AddThemeColorOverride(
+                    "font_color",
+                    isSelected ? new Color(0.35f, 0.95f, 1.0f) : Colors.Transparent
+                );
+                _choiceOptionLabels[i].AddThemeColorOverride(
+                    "font_color",
+                    isSelected ? Colors.White : new Color(0.72f, 0.74f, 0.78f)
+                );
+            }
         }
     }
 }
