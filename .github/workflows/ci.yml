@@ -60,6 +60,8 @@ jobs:
           fi
       - name: Import Godot project
         run: godot --headless --editor --path . --quit
+      - name: Build .NET project with diagnostics
+        run: dotnet build RPG2D.csproj --verbosity minimal
       - name: Build Godot C# project
         run: godot --headless --build-solutions --path . --quit
       - name: Smoke test configured main scene

@@ -1,5 +1,8 @@
+using System;
+using System.Collections.Generic;
 using Godot;
 using RPG2D.Features.Interaction;
+using RPG2D.Features.Interaction.Data;
 
 namespace RPG2D.Features.Exploration
 {
@@ -7,37 +10,38 @@ namespace RPG2D.Features.Exploration
     {
         private PlayerController _playerController = null!;
         private TerminalController? _currentTerminal;
-        private CanvasLayer _ui = null!;
-        private Label _promptLabel = null!;
-        private PanelContainer _messagePanel = null!;
-        private Label _titleLabel = null!;
-        private Label _messageLabel = null!;
-        private Label _closeHintLabel = null!;
-        private bool _isMessageOpen;
+        private TerminalInteractionUI _interactionUi = null!;
+        private DialogueDatabase _dialogueDatabase = null!;
+        private DialogueDefinition? _currentDialogue;
+        private IReadOnlyList<DialogueChoiceDefinition> _choiceOptions =
+            Array.Empty<DialogueChoiceDefinition>();
+
+        private int _selectedChoiceIndex;
+        private bool _isInteractionOpen;
 
         public override void _Ready()
         {
             ProcessMode = ProcessModeEnum.Always;
             _playerController = GetParent<PlayerController>();
-            BuildInterface();
+            _dialogueDatabase = DialogueDatabase.Load();
+
+            _interactionUi = new TerminalInteractionUI();
+            AddChild(_interactionUi);
+            _interactionUi.ChoiceHovered += SelectChoice;
+            _interactionUi.ChoiceConfirmed += OnChoiceConfirmed;
         }
 
         public override void _Process(double delta)
         {
-            if (_isMessageOpen)
+            if (_isInteractionOpen)
             {
-                if (Input.IsActionJustPressed("interact") ||
-                    Input.IsActionJustPressed("ui_cancel"))
-                {
-                    CloseMessage();
-                }
-
+                HandleInteractionInput();
                 return;
             }
 
             if (_currentTerminal != null && Input.IsActionJustPressed("interact"))
             {
-                OpenMessage();
+                OpenInteraction();
             }
         }
 
@@ -45,9 +49,9 @@ namespace RPG2D.Features.Exploration
         {
             _currentTerminal = terminal;
 
-            if (!_isMessageOpen)
+            if (!_isInteractionOpen)
             {
-                _promptLabel.Visible = true;
+                _interactionUi.SetPromptVisible(true);
             }
         }
 
@@ -60,88 +64,180 @@ namespace RPG2D.Features.Exploration
 
             _currentTerminal = null;
 
-            if (!_isMessageOpen)
+            if (!_isInteractionOpen)
             {
-                _promptLabel.Visible = false;
+                _interactionUi.SetPromptVisible(false);
             }
         }
 
-        private void OpenMessage()
+        private void HandleInteractionInput()
+        {
+            if (Input.IsActionJustPressed("ui_cancel"))
+            {
+                CloseInteraction();
+                return;
+            }
+
+            if (Input.IsActionJustPressed("interaction_menu_up"))
+            {
+                MoveSelection(-1);
+                return;
+            }
+
+            if (Input.IsActionJustPressed("interaction_menu_down"))
+            {
+                MoveSelection(1);
+                return;
+            }
+
+            if (Input.IsActionJustPressed("interaction_confirm"))
+            {
+                ConfirmSelection();
+            }
+        }
+
+        private void MoveSelection(int direction)
+        {
+            if (_choiceOptions.Count == 0)
+            {
+                return;
+            }
+
+            _selectedChoiceIndex =
+                (_selectedChoiceIndex + direction + _choiceOptions.Count) % _choiceOptions.Count;
+
+            _interactionUi.SetSelectedChoice(_selectedChoiceIndex);
+        }
+
+        private void SelectChoice(int index)
+        {
+            if (!_isInteractionOpen ||
+                index < 0 ||
+                index >= _choiceOptions.Count ||
+                _selectedChoiceIndex == index)
+            {
+                return;
+            }
+
+            _selectedChoiceIndex = index;
+            _interactionUi.SetSelectedChoice(_selectedChoiceIndex);
+        }
+
+        private void OnChoiceConfirmed(int index)
+        {
+            if (index < 0 || index >= _choiceOptions.Count)
+            {
+                return;
+            }
+
+            SelectChoice(index);
+            ConfirmSelection();
+        }
+
+        private void ConfirmSelection()
+        {
+            if (_choiceOptions.Count == 0)
+            {
+                AdvanceDialogue();
+                return;
+            }
+
+            if (_selectedChoiceIndex < 0 ||
+                _selectedChoiceIndex >= _choiceOptions.Count)
+            {
+                return;
+            }
+
+            DialogueChoiceDefinition choice = _choiceOptions[_selectedChoiceIndex];
+
+            if (choice.ClosesInteraction)
+            {
+                CloseInteraction();
+                return;
+            }
+
+            if (!string.IsNullOrWhiteSpace(choice.NextDialogueId))
+            {
+                ShowDialogue(choice.NextDialogueId);
+                return;
+            }
+
+            _interactionUi.SetFeedback($"Bạn chọn: {choice.Text}");
+        }
+
+        private void AdvanceDialogue()
+        {
+            if (_currentDialogue == null ||
+                string.IsNullOrWhiteSpace(_currentDialogue.NextDialogueId))
+            {
+                return;
+            }
+
+            ShowDialogue(_currentDialogue.NextDialogueId);
+        }
+
+        private void OpenInteraction()
         {
             if (_currentTerminal == null)
             {
                 return;
             }
 
-            _isMessageOpen = true;
-            _titleLabel.Text = _currentTerminal.DisplayName;
-            _messageLabel.Text = _currentTerminal.Response;
-            _promptLabel.Visible = false;
-            _messagePanel.Visible = true;
+            if (!_dialogueDatabase.TryGetDialogue(
+                _currentTerminal.DialogueId,
+                out DialogueDefinition dialogue))
+            {
+                GD.PushWarning(
+                    $"Terminal '{_currentTerminal.Name}' references missing dialogue ID '{_currentTerminal.DialogueId}'."
+                );
+                return;
+            }
+
+            _isInteractionOpen = true;
+            ShowDialogue(dialogue);
+            _interactionUi.SetPromptVisible(false);
             _playerController.SetPhysicsProcess(false);
         }
 
-        private void CloseMessage()
+        private void ShowDialogue(string dialogueId)
         {
-            _isMessageOpen = false;
-            _messagePanel.Visible = false;
-            _playerController.SetPhysicsProcess(true);
-            _promptLabel.Visible = _currentTerminal != null;
+            if (!_dialogueDatabase.TryGetDialogue(dialogueId, out DialogueDefinition dialogue))
+            {
+                GD.PushWarning($"Dialogue references missing nextDialogueId '{dialogueId}'.");
+                return;
+            }
+
+            ShowDialogue(dialogue);
         }
 
-        private void BuildInterface()
+        private void ShowDialogue(DialogueDefinition dialogue)
         {
-            _ui = new CanvasLayer();
-            AddChild(_ui);
+            _currentDialogue = dialogue;
+            _choiceOptions = dialogue.Choices;
+            _selectedChoiceIndex = 0;
 
-            _promptLabel = new Label
+            List<string> choiceTexts = new();
+            foreach (DialogueChoiceDefinition choice in _choiceOptions)
             {
-                Text = "E — Interact",
-                HorizontalAlignment = HorizontalAlignment.Center,
-                VerticalAlignment = VerticalAlignment.Center,
-                Visible = false
-            };
-            _promptLabel.SetAnchorsAndOffsetsPreset(Control.LayoutPreset.CenterBottom);
-            _promptLabel.Position = new Vector2(-70, -90);
-            _promptLabel.Size = new Vector2(140, 32);
-            _ui.AddChild(_promptLabel);
+                choiceTexts.Add(choice.Text);
+            }
 
-            _messagePanel = new PanelContainer
-            {
-                Visible = false,
-                AnchorLeft = 0.15f,
-                AnchorTop = 1.0f,
-                AnchorRight = 0.85f,
-                AnchorBottom = 1.0f,
-                OffsetTop = -170,
-                OffsetBottom = -24
-            };
-            _ui.AddChild(_messagePanel);
+            _interactionUi.ShowInteraction(
+                dialogue.Title,
+                dialogue.Message,
+                choiceTexts,
+                _selectedChoiceIndex
+            );
+        }
 
-            VBoxContainer content = new VBoxContainer();
-            content.AddThemeConstantOverride("separation", 8);
-            _messagePanel.AddChild(content);
-
-            _titleLabel = new Label
-            {
-                Text = "Terminal",
-                HorizontalAlignment = HorizontalAlignment.Center
-            };
-            content.AddChild(_titleLabel);
-
-            _messageLabel = new Label
-            {
-                Text = string.Empty,
-                AutowrapMode = TextServer.AutowrapMode.WordSmart
-            };
-            content.AddChild(_messageLabel);
-
-            _closeHintLabel = new Label
-            {
-                Text = "E / Esc — Close",
-                HorizontalAlignment = HorizontalAlignment.Right
-            };
-            content.AddChild(_closeHintLabel);
+        private void CloseInteraction()
+        {
+            _isInteractionOpen = false;
+            _currentDialogue = null;
+            _choiceOptions = Array.Empty<DialogueChoiceDefinition>();
+            _interactionUi.HideInteraction();
+            _playerController.SetPhysicsProcess(true);
+            _interactionUi.SetPromptVisible(_currentTerminal != null);
         }
     }
 }

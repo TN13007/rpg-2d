@@ -1,0 +1,104 @@
+{
+  "schemaVersion": 1,
+  "dialogues": [
+    {
+      "id": "terminal_intro",
+      "title": "Terminal",
+      "message": "System online. No new messages.",
+      "choices": [
+        {
+          "id": "choice_1",
+          "text": "Lựa chọn 1",
+          "nextDialogueId": "choice_1_step_1"
+        },
+        {
+          "id": "choice_2",
+          "text": "Lựa chọn 2",
+          "nextDialogueId": "choice_2_step_1"
+        },
+        {
+          "id": "choice_3",
+          "text": "Lựa chọn 3",
+          "nextDialogueId": "choice_3_quiz"
+        },
+        { "id": "choice_4", "text": "Lựa chọn 4" },
+        { "id": "choice_5", "text": "Lựa chọn 5" },
+        { "id": "choice_6", "text": "Lựa chọn 6" },
+        { "id": "leave", "text": "Leave", "closesInteraction": true }
+      ]
+    },
+    {
+      "id": "choice_1_step_1",
+      "title": "Lựa chọn 1",
+      "message": "Nhấn Space để tiếp tục.",
+      "choices": [],
+      "nextDialogueId": "choice_1_step_2"
+    },
+    {
+      "id": "choice_1_step_2",
+      "title": "Lựa chọn 1",
+      "message": "Bạn đã nhấn Space. Nhấn thêm lần nữa để quay về các lựa chọn.",
+      "choices": [],
+      "nextDialogueId": "terminal_intro"
+    },
+    {
+      "id": "choice_2_step_1",
+      "title": "Lựa chọn 2",
+      "message": "Đây là lựa chọn 2. Nhấn Space lần 1.",
+      "choices": [],
+      "nextDialogueId": "choice_2_step_2"
+    },
+    {
+      "id": "choice_2_step_2",
+      "title": "Lựa chọn 2",
+      "message": "Bạn đã nhấn Space lần 1. Nhấn Space lần 2.",
+      "choices": [],
+      "nextDialogueId": "choice_2_step_3"
+    },
+    {
+      "id": "choice_2_step_3",
+      "title": "Lựa chọn 2",
+      "message": "Bạn đã nhấn Space lần 2. Nhấn Space lần 3.",
+      "choices": [],
+      "nextDialogueId": "choice_2_step_4"
+    },
+    {
+      "id": "choice_2_step_4",
+      "title": "Lựa chọn 2",
+      "message": "Bạn đã nhấn Space lần 3. Quay về các lựa chọn.",
+      "choices": [],
+      "nextDialogueId": "terminal_intro"
+    },
+    {
+      "id": "choice_3_quiz",
+      "title": "Câu đố",
+      "message": "1 + 1 = ?",
+      "choices": [
+        {
+          "id": "answer_1",
+          "text": "Bằng 1",
+          "nextDialogueId": "choice_3_answer_1"
+        },
+        {
+          "id": "answer_2",
+          "text": "Bằng 2",
+          "nextDialogueId": "choice_3_answer_2"
+        }
+      ]
+    },
+    {
+      "id": "choice_3_answer_1",
+      "title": "Câu trả lời",
+      "message": "Cũng đúng! Một giọt nước cộng một giọt nước vẫn là một giọt nước.",
+      "choices": [],
+      "nextDialogueId": "terminal_intro"
+    },
+    {
+      "id": "choice_3_answer_2",
+      "title": "Câu trả lời",
+      "message": "Chính xác! 1 + 1 = 2.",
+      "choices": [],
+      "nextDialogueId": "terminal_intro"
+    }
+  ]
+}

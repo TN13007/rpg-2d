@@ -6,10 +6,7 @@ namespace RPG2D.Features.Interaction
     public partial class TerminalController : Node2D
     {
         [Export]
-        public string DisplayName { get; set; } = "Terminal";
-
-        [Export(PropertyHint.MultilineText)]
-        public string Response { get; set; } = "System online. No new messages.";
+        public string DialogueId { get; set; } = "terminal_intro";
 
         private Area2D _interactionArea = null!;
 
