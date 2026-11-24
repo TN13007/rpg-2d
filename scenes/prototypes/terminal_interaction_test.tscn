@@ -11,12 +11,12 @@ size = Vector2(20, 380)
 
 [node name="TerminalInteractionTest" type="Node2D"]
 
-[node name="YSort" type="Node2D" parent="."]
-y_sort_enabled = true
-
 [node name="Floor" type="Polygon2D" parent="."]
 polygon = PackedVector2Array(-320, -180, 320, -180, 320, 180, -320, 180)
 color = Color(0.16, 0.22, 0.19, 1)
+
+[node name="YSort" type="Node2D" parent="."]
+y_sort_enabled = true
 
 [node name="NorthWall" type="StaticBody2D" parent="."]
 position = Vector2(0, -190)
