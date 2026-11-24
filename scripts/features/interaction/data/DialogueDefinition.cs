@@ -16,5 +16,8 @@ namespace RPG2D.Features.Interaction.Data
 
         [JsonPropertyName("choices")]
         public List<DialogueChoiceDefinition> Choices { get; set; } = new();
+
+        [JsonPropertyName("nextDialogueId")]
+        public string NextDialogueId { get; set; } = string.Empty;
     }
 }
