@@ -15,8 +15,8 @@ namespace RPG2D.Features.Exploration
         private Label _feedbackLabel = null!;
         private Label _closeHintLabel = null!;
         private ScrollContainer _choicesScrollContainer = null!;
-        private readonly PanelContainer[] _choiceRows = new PanelContainer[4];
-        private readonly Label[] _choiceCursorLabels = new Label[4];
+        private readonly PanelContainer[] _choiceRows = new PanelContainer[7];
+        private readonly Label[] _choiceCursorLabels = new Label[7];
         private readonly Label[] _choiceOptionLabels = new Label[4];
         private int _selectedChoiceIndex;
         private bool _isInteractionOpen;
@@ -113,7 +113,7 @@ namespace RPG2D.Features.Exploration
 
         private void ConfirmSelection()
         {
-            if (_selectedChoiceIndex == 3)
+            if (_selectedChoiceIndex == 6)
             {
                 CloseInteraction();
                 return;
@@ -218,7 +218,10 @@ namespace RPG2D.Features.Exploration
             CreateChoiceRow(choicesContainer, 0, "Lựa chọn 1");
             CreateChoiceRow(choicesContainer, 1, "Lựa chọn 2");
             CreateChoiceRow(choicesContainer, 2, "Lựa chọn 3");
-            CreateChoiceRow(choicesContainer, 3, "Leave");
+            CreateChoiceRow(choicesContainer, 3, "Lựa chọn 4");
+            CreateChoiceRow(choicesContainer, 4, "Lựa chọn 5");
+            CreateChoiceRow(choicesContainer, 5, "Lựa chọn 6");
+            CreateChoiceRow(choicesContainer, 6, "Leave");
 
             _feedbackLabel = new Label
             {
