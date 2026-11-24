@@ -14,6 +14,20 @@
       "description": "Một thanh kiếm sắt.",
       "stackable": false,
       "maxStackSize": 1
+    },
+    {
+      "id": "item_a",
+      "name": "Đồ A",
+      "description": "Mô tả A",
+      "stackable": true,
+      "maxStackSize": 20
+    },
+    {
+      "id": "item_b",
+      "name": "Đồ B",
+      "description": "Mô tả B",
+      "stackable": true,
+      "maxStackSize": 20
     }
   ]
 }
