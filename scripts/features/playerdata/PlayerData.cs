@@ -1,15 +1,25 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json.Serialization;
 
 namespace RPG2D.Features.PlayerData
 {
     public sealed class ItemDefinition
     {
+        [JsonPropertyName("id")]
         public string Id { get; init; } = string.Empty;
+
+        [JsonPropertyName("name")]
         public string Name { get; init; } = string.Empty;
+
+        [JsonPropertyName("description")]
         public string Description { get; init; } = string.Empty;
+
+        [JsonPropertyName("stackable")]
         public bool Stackable { get; init; } = true;
+
+        [JsonPropertyName("maxStackSize")]
         public int MaxStackSize { get; init; } = 99;
 
         public bool IsValid()
