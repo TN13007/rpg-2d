@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "items": [
+    {
+      "id": "item_a",
+      "name": "Đồ A",
+      "description": "Mô tả A"
+    },
+    {
+      "id": "item_b",
+      "name": "Đồ B",
+      "description": "Mô tả B"
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "currency": 1000,
+  "inventory": [
+    {
+      "itemId": "item_a",
+      "quantity": 1
+    }
+  ]
+}

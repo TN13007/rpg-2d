@@ -1,0 +1,16 @@
+{
+  "id": "default_shop",
+  "name": "Cửa hàng",
+  "items": [
+    {
+      "itemId": "item_a",
+      "price": 100,
+      "stock": 20
+    },
+    {
+      "itemId": "item_b",
+      "price": 250,
+      "stock": 10
+    }
+  ]
+}
