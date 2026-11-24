@@ -24,7 +24,7 @@ namespace RPG2D.Features.Interaction.Data
         {
             DialogueDatabase database = new();
 
-            database.LoadManifest(_builtInManifestPath, isMod: false);
+            database.LoadManifest(BuiltInManifestPath, isMod: false);
             database.LoadMods();
 
             GD.Print($"Dialogue database loaded: {database._dialogues.Count} dialogue(s).");
@@ -39,7 +39,7 @@ namespace RPG2D.Features.Interaction.Data
         private void LoadMods()
         {
             Error directoryError = DirAccess.MakeDirRecursiveAbsolute(
-                ProjectSettings.GlobalizePath(_modDirectoryPath)
+                ProjectSettings.GlobalizePath(ModDirectoryPath)
             );
 
             if (directoryError != Error.Ok && directoryError != Error.AlreadyExists)
@@ -48,14 +48,14 @@ namespace RPG2D.Features.Interaction.Data
                 return;
             }
 
-            string[] modFiles = DirAccess.GetFilesAt(_modDirectoryPath)
+            string[] modFiles = DirAccess.GetFilesAt(ModDirectoryPath)
                 .Where(file => file.EndsWith(".json", StringComparison.OrdinalIgnoreCase))
                 .OrderBy(file => file, StringComparer.OrdinalIgnoreCase)
                 .ToArray();
 
             foreach (string fileName in modFiles)
             {
-                LoadManifest($"{_modDirectoryPath}/{fileName}", isMod: true);
+                LoadManifest($"{ModDirectoryPath}/{fileName}", isMod: true);
             }
         }
 
