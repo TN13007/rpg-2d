@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" uid="uid://tgegpr0aaxms" path="res://scripts/features/exploration/PlayerController.cs" id="1_controller"]
 [ext_resource type="Texture2D" uid="uid://cr4heugrrgs2t" path="res://assets/characters/ninja_adventure/characters/Boy/SpriteSheet.png" id="2_sprite"]
+[ext_resource type="Script" path="res://scripts/features/exploration/PlayerAnimationController.cs" id="3_animation_controller"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_player"]
 size = Vector2(8, 6)
@@ -269,3 +270,6 @@ tree_root = SubResource("AnimationNodeStateMachine_76oj4")
 anim_player = NodePath("../AnimationPlayer")
 parameters/Idle/blend_position = Vector2(0, 1)
 parameters/Walk/blend_position = Vector2(0, 1)
+
+[node name="PlayerAnimationController" type="Node" parent="." unique_id=1902001001]
+script = ExtResource("3_animation_controller")
