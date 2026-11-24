@@ -182,7 +182,7 @@ namespace RPG2D.Features.Shop
             }
 
             if (!_playerData.TryPurchaseItem(
-                shopItem.ItemId,
+                item,
                 shopItem.Price,
                 _selectedQuantity,
                 out string failureReason
