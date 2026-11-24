@@ -1,0 +1,12 @@
+{
+  "inventory": [
+    {
+      "itemId": "health_potion",
+      "quantity": 1
+    },
+    {
+      "itemId": "iron_sword",
+      "quantity": 1
+    }
+  ]
+}
