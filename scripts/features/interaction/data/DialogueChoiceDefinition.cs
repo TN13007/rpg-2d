@@ -10,7 +10,7 @@ namespace RPG2D.Features.Interaction.Data
         [JsonPropertyName("text")]
         public string Text { get; set; } = string.Empty;
 
-        [JsonPropertyName("closes_interaction")]
+        [JsonPropertyName("closesInteraction")]
         public bool ClosesInteraction { get; set; }
     }
 }
