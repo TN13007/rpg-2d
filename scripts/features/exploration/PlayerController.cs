@@ -4,21 +4,25 @@ namespace RPG2D.Features.Exploration
 {
     public partial class PlayerController : CharacterBody2D
     {
-        private const int WalkFrameCount = 4;
-        private const float AnimationFramesPerSecond = 6.0f;
+        private static readonly StringName _idleState = "Idle";
+        private static readonly StringName _walkState = "Walk";
 
-        private Sprite2D _sprite = null!;
-        private int _facingColumn;
-        private int _walkFrame;
-        private float _animationTimer;
+        private AnimationTree _animationTree = null!;
+        private AnimationNodeStateMachinePlayback _animationPlayback = null!;
+        private Vector2 _facingDirection;
+        private StringName _currentAnimationState = new();
 
         [Export]
         public float MoveSpeed { get; set; } = 90.0f;
 
         public override void _Ready()
         {
-            _sprite = GetNode<Sprite2D>("Sprite");
-            _sprite.FrameCoords = new Vector2I(_facingColumn, 0);
+            _animationTree = GetNode<AnimationTree>("AnimationTree");
+            _animationTree.Active = true;
+
+            _animationPlayback = _animationTree
+                .Get("parameters/playback")
+                .As<AnimationNodeStateMachinePlayback>();
         }
 
         public override void _PhysicsProcess(double delta)
@@ -38,38 +42,48 @@ namespace RPG2D.Features.Exploration
             Velocity = movement * MoveSpeed;
             MoveAndSlide();
 
-            UpdateAnimation(movement, (float)delta);
+            UpdateAnimation(movement);
         }
 
-        private void UpdateAnimation(Vector2 movement, float delta)
+        private void UpdateAnimation(Vector2 movement)
         {
             if (movement == Vector2.Zero)
             {
-                _walkFrame = 0;
-                _animationTimer = 0.0f;
-                _sprite.FrameCoords = new Vector2I(_facingColumn, 0);
+                TransitionTo(_idleState);
                 return;
             }
 
+            Vector2 facingDirection = GetFacingDirection(movement);
+
+            if (facingDirection != _facingDirection)
+            {
+                _facingDirection = facingDirection;
+                _animationTree.Set("parameters/Idle/blend_position", _facingDirection);
+                _animationTree.Set("parameters/Walk/blend_position", _facingDirection);
+            }
+
+            TransitionTo(_walkState);
+        }
+
+        private static Vector2 GetFacingDirection(Vector2 movement)
+        {
             if (Mathf.Abs(movement.X) > Mathf.Abs(movement.Y))
             {
-                _facingColumn = movement.X < 0.0f ? 2 : 3;
+                return new Vector2(Mathf.Sign(movement.X), 0.0f);
             }
-            else
+
+            return new Vector2(0.0f, -Mathf.Sign(movement.Y));
+        }
+
+        private void TransitionTo(StringName targetState)
+        {
+            if (_currentAnimationState == targetState)
             {
-                _facingColumn = movement.Y < 0.0f ? 1 : 0;
+                return;
             }
 
-            _animationTimer += delta;
-            float frameDuration = 1.0f / AnimationFramesPerSecond;
-
-            while (_animationTimer >= frameDuration)
-            {
-                _animationTimer -= frameDuration;
-                _walkFrame = (_walkFrame + 1) % WalkFrameCount;
-            }
-
-            _sprite.FrameCoords = new Vector2I(_facingColumn, _walkFrame);
+            _animationPlayback.Travel(targetState);
+            _currentAnimationState = targetState;
         }
     }
 }
