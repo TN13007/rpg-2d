@@ -74,19 +74,19 @@ namespace RPG2D.Features.Exploration
                 return;
             }
 
-            if (Input.IsActionJustPressed("ui_up"))
+            if (Input.IsActionJustPressed("interaction_menu_up"))
             {
                 MoveSelection(-1);
                 return;
             }
 
-            if (Input.IsActionJustPressed("ui_down"))
+            if (Input.IsActionJustPressed("interaction_menu_down"))
             {
                 MoveSelection(1);
                 return;
             }
 
-            if (Input.IsActionJustPressed("ui_accept"))
+            if (Input.IsActionJustPressed("interaction_confirm"))
             {
                 ConfirmSelection();
             }
@@ -200,7 +200,7 @@ namespace RPG2D.Features.Exploration
 
             _closeHintLabel = new Label
             {
-                Text = "↑ / ↓ Di chuyển     Enter — Chọn     Esc — Đóng",
+                Text = "W / S — Di chuyển     Space — Chọn     Esc — Đóng",
                 HorizontalAlignment = HorizontalAlignment.Right
             };
             content.AddChild(_closeHintLabel);
