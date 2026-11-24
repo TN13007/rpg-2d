@@ -1,41 +1,31 @@
 # Player Data Contract
 
-This document defines the shared runtime data contract for features that read or change the player's currency and inventory, including Shop (#19) and Gift (#20).
+This document describes how gameplay features share player currency and Inventory.
 
-## Source data
+## Runtime ownership
 
-The prototype loads its starting state from `res://data/player/player_data.json`:
+- One `PlayerData` instance owns the player's currency and Inventory for the current session.
+- `PlayerInteractionController` creates the shared `ItemDatabase` and `PlayerData` instances, then passes them to feature controllers.
+- Feature controllers must not load another copy of player data or mutate Inventory stacks directly.
+- Inventory stack rules and the four core Inventory APIs are documented in [Inventory Contract](inventory_contract.md).
 
-- `currency`: the player's starting currency.
-- `inventory`: an array of item stacks. Each stack contains `itemId` and `quantity`.
+## Currency API
 
-Item names and descriptions are defined once in `res://data/items/items.json`. Features should store item IDs in inventory and resolve presentation through `ItemDatabase`.
+- `Currency`: read-only current balance.
+- `TryAddCurrency(amount)`: adds a positive amount if the balance will not overflow.
+- `TrySpendCurrency(amount, allowDebt = false)`: spends a positive amount. Debt is denied by default and must be explicitly allowed by the caller.
+- `TryPurchaseItem(itemDefinition, unitPrice, quantity, out failureReason)`: validates funds and item addition, adds through `TryAddItem`, then deducts currency. If validation or item addition fails, neither currency nor Inventory changes.
 
-The current prototype loads these JSON files at startup. Changes are held in memory for the running session; persistent saving and loading are not part of this contract yet.
+Currency is not an Inventory item. Shop purchases do not allow debt.
 
-## Runtime API
+## Loading
 
-Namespace: `RPG2D.Features.PlayerData`
+- `ItemDatabase.Load()` reads item definitions from `res://data/items/items.json`.
+- `PlayerDataDatabase.Load(itemDatabase)` reads the starting currency and Inventory from `res://data/player/player_data.json`.
+- Runtime changes remain in memory. Persistence is outside this prototype.
 
-- `PlayerData.Currency`: current currency.
-- `PlayerData.Inventory`: current item stacks.
-- `PlayerData.GetItemQuantity(itemId)`: returns the owned quantity.
-- `PlayerData.TryPurchaseItem(itemId, unitPrice, quantity, out failureReason)`: atomically checks funds and adds the purchased quantity while deducting currency.
-- `PlayerData.TryRemoveItem(itemId, quantity)`: removes an available quantity; returns false without changing inventory when the requested quantity is unavailable.
-- `ItemDatabase.TryGetItem(itemId, out item)`: resolves the shared item name and description.
-- `PlayerDataDatabase.Load()`: loads the starting player data.
+## Feature boundaries
 
-## Sharing the state between features
+Shop owns shop stock, price and purchase UI. It delegates the player-side transaction to `PlayerData.TryPurchaseItem`, and decreases stock only after that method succeeds.
 
-`PlayerInteractionController` creates one `PlayerData` instance and passes that same instance to interaction feature controllers. New features must receive and use that instance; they must not load a second copy or create their own inventory/currency collections.
-
-Shop and Gift may own separate UI and interaction controllers. They must share `PlayerData` and `ItemDatabase`, and should keep their feature-specific rules in their own files.
-
-## Prototype fixture
-
-- Starting currency: 1000 vàng.
-- Starting inventory: 1 × `item_a`.
-- `item_a`: Đồ A — Mô tả A.
-- `item_b`: Đồ B — Mô tả B.
-
-These values are test fixtures, not a final economy balance.
+Gift and future item-reward features should use `TryRemoveItem` and `TryAddItem` rather than editing the Inventory collection.
