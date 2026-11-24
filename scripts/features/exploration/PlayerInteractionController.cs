@@ -14,6 +14,7 @@ namespace RPG2D.Features.Exploration
         private Label _messageLabel = null!;
         private Label _feedbackLabel = null!;
         private Label _closeHintLabel = null!;
+        private ScrollContainer _choicesScrollContainer = null!;
         private readonly PanelContainer[] _choiceRows = new PanelContainer[4];
         private readonly Label[] _choiceCursorLabels = new Label[4];
         private readonly Label[] _choiceOptionLabels = new Label[4];
@@ -96,6 +97,18 @@ namespace RPG2D.Features.Exploration
         {
             _selectedChoiceIndex = (_selectedChoiceIndex + direction + _choiceRows.Length) % _choiceRows.Length;
             UpdateSelectionVisuals();
+            _choicesScrollContainer.EnsureControlVisible(_choiceRows[_selectedChoiceIndex]);
+        }
+
+        private void SelectChoice(int index)
+        {
+            if (!_isInteractionOpen || _selectedChoiceIndex == index)
+            {
+                return;
+            }
+
+            _selectedChoiceIndex = index;
+            UpdateSelectionVisuals();
         }
 
         private void ConfirmSelection()
@@ -155,12 +168,14 @@ namespace RPG2D.Features.Exploration
             _interactionPanel = new PanelContainer
             {
                 Visible = false,
-                AnchorLeft = 0.15f,
-                AnchorTop = 1.0f,
-                AnchorRight = 0.85f,
-                AnchorBottom = 1.0f,
-                OffsetTop = -260,
-                OffsetBottom = -24
+                AnchorLeft = 0.04f,
+                AnchorTop = 0.48f,
+                AnchorRight = 0.96f,
+                AnchorBottom = 0.96f,
+                OffsetLeft = 8,
+                OffsetTop = 0,
+                OffsetRight = -8,
+                OffsetBottom = -8
             };
             _ui.AddChild(_interactionPanel);
 
@@ -182,9 +197,21 @@ namespace RPG2D.Features.Exploration
             };
             content.AddChild(_messageLabel);
 
-            VBoxContainer choicesContainer = new VBoxContainer();
+            _choicesScrollContainer = new ScrollContainer
+            {
+                CustomMinimumSize = new Vector2(0, 112),
+                SizeFlagsVertical = Control.SizeFlags.ExpandFill,
+                HorizontalScrollMode = ScrollContainer.ScrollMode.Disabled,
+                VerticalScrollMode = ScrollContainer.ScrollMode.Auto
+            };
+            content.AddChild(_choicesScrollContainer);
+
+            VBoxContainer choicesContainer = new VBoxContainer
+            {
+                SizeFlagsHorizontal = Control.SizeFlags.ExpandFill
+            };
             choicesContainer.AddThemeConstantOverride("separation", 4);
-            content.AddChild(choicesContainer);
+            _choicesScrollContainer.AddChild(choicesContainer);
 
             CreateChoiceRow(choicesContainer, 0, "Lựa chọn 1");
             CreateChoiceRow(choicesContainer, 1, "Lựa chọn 2");
@@ -201,7 +228,8 @@ namespace RPG2D.Features.Exploration
             _closeHintLabel = new Label
             {
                 Text = "W / S — Di chuyển     Space — Chọn     Esc — Đóng",
-                HorizontalAlignment = HorizontalAlignment.Right
+                HorizontalAlignment = HorizontalAlignment.Right,
+                AutowrapMode = TextServer.AutowrapMode.WordSmart
             };
             content.AddChild(_closeHintLabel);
 
@@ -212,10 +240,24 @@ namespace RPG2D.Features.Exploration
         {
             PanelContainer row = new PanelContainer
             {
-                CustomMinimumSize = new Vector2(0, 34)
+                CustomMinimumSize = new Vector2(0, 34),
+                SizeFlagsHorizontal = Control.SizeFlags.ExpandFill,
+                MouseFilter = Control.MouseFilterEnum.Stop
             };
             parent.AddChild(row);
             _choiceRows[index] = row;
+
+            row.MouseEntered += () => SelectChoice(index);
+            row.GuiInput += input =>
+            {
+                if (input is InputEventMouseButton mouseButton &&
+                    mouseButton.Pressed &&
+                    mouseButton.ButtonIndex == MouseButton.Left)
+                {
+                    SelectChoice(index);
+                    ConfirmSelection();
+                }
+            };
 
             HBoxContainer rowContent = new HBoxContainer();
             rowContent.AddThemeConstantOverride("separation", 8);
