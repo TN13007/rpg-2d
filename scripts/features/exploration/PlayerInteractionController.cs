@@ -186,7 +186,8 @@ namespace RPG2D.Features.Exploration
             _titleLabel = new Label
             {
                 Text = "Terminal",
-                HorizontalAlignment = HorizontalAlignment.Center
+                HorizontalAlignment = HorizontalAlignment.Center,
+                MouseFilter = Control.MouseFilterEnum.Ignore
             };
             content.AddChild(_titleLabel);
 
@@ -208,7 +209,8 @@ namespace RPG2D.Features.Exploration
 
             VBoxContainer choicesContainer = new VBoxContainer
             {
-                SizeFlagsHorizontal = Control.SizeFlags.ExpandFill
+                SizeFlagsHorizontal = Control.SizeFlags.ExpandFill,
+                MouseFilter = Control.MouseFilterEnum.Ignore
             };
             choicesContainer.AddThemeConstantOverride("separation", 4);
             _choicesScrollContainer.AddChild(choicesContainer);
@@ -259,7 +261,10 @@ namespace RPG2D.Features.Exploration
                 }
             };
 
-            HBoxContainer rowContent = new HBoxContainer();
+            HBoxContainer rowContent = new HBoxContainer
+            {
+                MouseFilter = Control.MouseFilterEnum.Ignore
+            };
             rowContent.AddThemeConstantOverride("separation", 8);
             row.AddChild(rowContent);
 
