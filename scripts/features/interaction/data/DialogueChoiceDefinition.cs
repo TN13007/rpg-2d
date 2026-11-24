@@ -12,5 +12,8 @@ namespace RPG2D.Features.Interaction.Data
 
         [JsonPropertyName("closesInteraction")]
         public bool ClosesInteraction { get; set; }
+
+        [JsonPropertyName("nextDialogueId")]
+        public string NextDialogueId { get; set; } = string.Empty;
     }
 }
