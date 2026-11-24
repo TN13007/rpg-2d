@@ -61,14 +61,15 @@ namespace RPG2D.Features.Interaction.Data
 
         private void LoadManifest(string path, bool isMod)
         {
-            using FileAccess? file = FileAccess.Open(path, FileAccess.ModeFlags.Read);
+            Godot.FileAccess? file = Godot.FileAccess.Open(path, Godot.FileAccess.ModeFlags.Read);
             if (file == null)
             {
-                GD.PushWarning($"Could not read dialogue file '{path}': {FileAccess.GetOpenError()}");
+                GD.PushWarning($"Could not read dialogue file '{path}': {Godot.FileAccess.GetOpenError()}");
                 return;
             }
 
             string json = file.GetAsText();
+            file.Close();
             DialogueManifest? manifest;
 
             try
