@@ -9,10 +9,10 @@ namespace RPG2D.Features.Interaction.Data
 {
     public sealed class DialogueDatabase
     {
-        private const string BuiltInManifestPath = "res://data/dialogues/dialogues.json";
-        private const string ModDirectoryPath = "user://mods/dialogues";
+        private const string _builtInManifestPath = "res://data/dialogues/dialogues.json";
+        private const string _modDirectoryPath = "user://mods/dialogues";
 
-        private static readonly JsonSerializerOptions JsonOptions = new()
+        private static readonly JsonSerializerOptions _jsonOptions = new()
         {
             PropertyNameCaseInsensitive = true
         };
@@ -24,7 +24,7 @@ namespace RPG2D.Features.Interaction.Data
         {
             DialogueDatabase database = new();
 
-            database.LoadManifest(BuiltInManifestPath, isMod: false);
+            database.LoadManifest(_builtInManifestPath, isMod: false);
             database.LoadMods();
 
             GD.Print($"Dialogue database loaded: {database._dialogues.Count} dialogue(s).");
@@ -39,7 +39,7 @@ namespace RPG2D.Features.Interaction.Data
         private void LoadMods()
         {
             Error directoryError = DirAccess.MakeDirRecursiveAbsolute(
-                ProjectSettings.GlobalizePath(ModDirectoryPath)
+                ProjectSettings.GlobalizePath(_modDirectoryPath)
             );
 
             if (directoryError != Error.Ok && directoryError != Error.AlreadyExists)
@@ -48,14 +48,14 @@ namespace RPG2D.Features.Interaction.Data
                 return;
             }
 
-            string[] modFiles = DirAccess.GetFilesAt(ModDirectoryPath)
+            string[] modFiles = DirAccess.GetFilesAt(_modDirectoryPath)
                 .Where(file => file.EndsWith(".json", StringComparison.OrdinalIgnoreCase))
                 .OrderBy(file => file, StringComparer.OrdinalIgnoreCase)
                 .ToArray();
 
             foreach (string fileName in modFiles)
             {
-                LoadManifest($"{ModDirectoryPath}/{fileName}", isMod: true);
+                LoadManifest($"{_modDirectoryPath}/{fileName}", isMod: true);
             }
         }
 
@@ -74,7 +74,7 @@ namespace RPG2D.Features.Interaction.Data
 
             try
             {
-                manifest = JsonSerializer.Deserialize<DialogueManifest>(json, JsonOptions);
+                manifest = JsonSerializer.Deserialize<DialogueManifest>(json, _jsonOptions);
             }
             catch (JsonException exception)
             {
