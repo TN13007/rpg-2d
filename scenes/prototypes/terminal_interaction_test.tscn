@@ -11,6 +11,9 @@ size = Vector2(20, 380)
 
 [node name="TerminalInteractionTest" type="Node2D"]
 
+[node name="YSort" type="Node2D" parent="."]
+y_sort_enabled = true
+
 [node name="Floor" type="Polygon2D" parent="."]
 polygon = PackedVector2Array(-320, -180, 320, -180, 320, 180, -320, 180)
 color = Color(0.16, 0.22, 0.19, 1)
@@ -47,8 +50,8 @@ collision_mask = 1
 [node name="CollisionShape2D" type="CollisionShape2D" parent="EastWall"]
 shape = SubResource("RectangleShape2D_vertical_wall")
 
-[node name="Player" parent="." instance=ExtResource("1_player")]
+[node name="Player" parent="YSort" instance=ExtResource("1_player")]
 position = Vector2(-100, 0)
 
-[node name="Terminal" parent="." instance=ExtResource("2_terminal")]
+[node name="Terminal" parent="YSort" instance=ExtResource("2_terminal")]
 position = Vector2(100, 0)
