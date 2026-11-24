@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Godot;
 using RPG2D.Features.Interaction;
 
@@ -5,6 +6,38 @@ namespace RPG2D.Features.Exploration
 {
     public partial class PlayerInteractionController : Node
     {
+        private sealed class ChoiceDefinition
+        {
+            public string Text { get; }
+            public bool ClosesInteraction { get; }
+
+            public ChoiceDefinition(string text, bool closesInteraction = false)
+            {
+                Text = text;
+                ClosesInteraction = closesInteraction;
+            }
+        }
+
+        private sealed class ChoiceRow
+        {
+            public PanelContainer Row { get; }
+            public Label CursorLabel { get; }
+            public Label OptionLabel { get; }
+            public bool ClosesInteraction { get; }
+
+            public ChoiceRow(
+                PanelContainer row,
+                Label cursorLabel,
+                Label optionLabel,
+                bool closesInteraction)
+            {
+                Row = row;
+                CursorLabel = cursorLabel;
+                OptionLabel = optionLabel;
+                ClosesInteraction = closesInteraction;
+            }
+        }
+
         private PlayerController _playerController = null!;
         private TerminalController? _currentTerminal;
         private CanvasLayer _ui = null!;
@@ -13,11 +46,20 @@ namespace RPG2D.Features.Exploration
         private Label _titleLabel = null!;
         private Label _messageLabel = null!;
         private Label _feedbackLabel = null!;
-        private Label _closeHintLabel = null!;
         private ScrollContainer _choicesScrollContainer = null!;
-        private readonly PanelContainer[] _choiceRows = new PanelContainer[7];
-        private readonly Label[] _choiceCursorLabels = new Label[7];
-        private readonly Label[] _choiceOptionLabels = new Label[4];
+
+        private readonly List<ChoiceDefinition> _choiceOptions = new()
+        {
+            new ChoiceDefinition("Lựa chọn 1"),
+            new ChoiceDefinition("Lựa chọn 2"),
+            new ChoiceDefinition("Lựa chọn 3"),
+            new ChoiceDefinition("Lựa chọn 4"),
+            new ChoiceDefinition("Lựa chọn 5"),
+            new ChoiceDefinition("Lựa chọn 6"),
+            new ChoiceDefinition("Leave", true)
+        };
+
+        private readonly List<ChoiceRow> _choiceRows = new();
         private int _selectedChoiceIndex;
         private bool _isInteractionOpen;
 
@@ -95,14 +137,26 @@ namespace RPG2D.Features.Exploration
 
         private void MoveSelection(int direction)
         {
-            _selectedChoiceIndex = (_selectedChoiceIndex + direction + _choiceRows.Length) % _choiceRows.Length;
+            if (_choiceRows.Count == 0)
+            {
+                return;
+            }
+
+            _selectedChoiceIndex =
+                (_selectedChoiceIndex + direction + _choiceRows.Count) % _choiceRows.Count;
+
             UpdateSelectionVisuals();
-            _choicesScrollContainer.EnsureControlVisible(_choiceRows[_selectedChoiceIndex]);
+            _choicesScrollContainer.EnsureControlVisible(
+                _choiceRows[_selectedChoiceIndex].Row
+            );
         }
 
         private void SelectChoice(int index)
         {
-            if (!_isInteractionOpen || _selectedChoiceIndex == index)
+            if (!_isInteractionOpen ||
+                index < 0 ||
+                index >= _choiceRows.Count ||
+                _selectedChoiceIndex == index)
             {
                 return;
             }
@@ -113,7 +167,13 @@ namespace RPG2D.Features.Exploration
 
         private void ConfirmSelection()
         {
-            if (_selectedChoiceIndex == 6)
+            if (_selectedChoiceIndex < 0 ||
+                _selectedChoiceIndex >= _choiceRows.Count)
+            {
+                return;
+            }
+
+            if (_choiceRows[_selectedChoiceIndex].ClosesInteraction)
             {
                 CloseInteraction();
                 return;
@@ -215,13 +275,12 @@ namespace RPG2D.Features.Exploration
             choicesContainer.AddThemeConstantOverride("separation", 4);
             _choicesScrollContainer.AddChild(choicesContainer);
 
-            CreateChoiceRow(choicesContainer, 0, "Lựa chọn 1");
-            CreateChoiceRow(choicesContainer, 1, "Lựa chọn 2");
-            CreateChoiceRow(choicesContainer, 2, "Lựa chọn 3");
-            CreateChoiceRow(choicesContainer, 3, "Lựa chọn 4");
-            CreateChoiceRow(choicesContainer, 4, "Lựa chọn 5");
-            CreateChoiceRow(choicesContainer, 5, "Lựa chọn 6");
-            CreateChoiceRow(choicesContainer, 6, "Leave");
+            _choiceRows.Clear();
+
+            for (int i = 0; i < _choiceOptions.Count; i++)
+            {
+                CreateChoiceRow(choicesContainer, i, _choiceOptions[i]);
+            }
 
             _feedbackLabel = new Label
             {
@@ -230,18 +289,21 @@ namespace RPG2D.Features.Exploration
             };
             content.AddChild(_feedbackLabel);
 
-            _closeHintLabel = new Label
+            Label closeHintLabel = new Label
             {
                 Text = "W / S — Di chuyển     Space — Chọn     Esc — Đóng",
                 HorizontalAlignment = HorizontalAlignment.Right,
                 AutowrapMode = TextServer.AutowrapMode.WordSmart
             };
-            content.AddChild(_closeHintLabel);
+            content.AddChild(closeHintLabel);
 
             UpdateSelectionVisuals();
         }
 
-        private void CreateChoiceRow(VBoxContainer parent, int index, string optionText)
+        private void CreateChoiceRow(
+            VBoxContainer parent,
+            int index,
+            ChoiceDefinition option)
         {
             PanelContainer row = new PanelContainer
             {
@@ -250,7 +312,6 @@ namespace RPG2D.Features.Exploration
                 MouseFilter = Control.MouseFilterEnum.Stop
             };
             parent.AddChild(row);
-            _choiceRows[index] = row;
 
             row.MouseEntered += () => SelectChoice(index);
             row.GuiInput += input =>
@@ -279,23 +340,29 @@ namespace RPG2D.Features.Exploration
                 HorizontalAlignment = HorizontalAlignment.Center
             };
             rowContent.AddChild(cursorLabel);
-            _choiceCursorLabels[index] = cursorLabel;
 
             Label optionLabel = new Label
             {
-                Text = optionText,
+                Text = option.Text,
                 VerticalAlignment = VerticalAlignment.Center,
                 SizeFlagsHorizontal = Control.SizeFlags.ExpandFill
             };
             rowContent.AddChild(optionLabel);
-            _choiceOptionLabels[index] = optionLabel;
+
+            _choiceRows.Add(new ChoiceRow(
+                row,
+                cursorLabel,
+                optionLabel,
+                option.ClosesInteraction
+            ));
         }
 
         private void UpdateSelectionVisuals()
         {
-            for (int i = 0; i < _choiceRows.Length; i++)
+            for (int i = 0; i < _choiceRows.Count; i++)
             {
                 bool isSelected = i == _selectedChoiceIndex;
+                ChoiceRow choice = _choiceRows[i];
 
                 StyleBoxFlat style = new StyleBoxFlat
                 {
@@ -309,13 +376,13 @@ namespace RPG2D.Features.Exploration
                 style.SetBorderWidthAll(isSelected ? 2 : 1);
                 style.SetCornerRadiusAll(4);
 
-                _choiceRows[i].AddThemeStyleboxOverride("panel", style);
-                _choiceCursorLabels[i].Text = isSelected ? "▶" : string.Empty;
-                _choiceCursorLabels[i].AddThemeColorOverride(
+                choice.Row.AddThemeStyleboxOverride("panel", style);
+                choice.CursorLabel.Text = isSelected ? "▶" : string.Empty;
+                choice.CursorLabel.AddThemeColorOverride(
                     "font_color",
                     isSelected ? new Color(0.35f, 0.95f, 1.0f) : Colors.Transparent
                 );
-                _choiceOptionLabels[i].AddThemeColorOverride(
+                choice.OptionLabel.AddThemeColorOverride(
                     "font_color",
                     isSelected ? Colors.White : new Color(0.72f, 0.74f, 0.78f)
                 );
