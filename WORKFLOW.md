@@ -34,7 +34,7 @@ Validate one complete player journey before expanding the system set. Design dir
 - PR [#28 — typed item hierarchy](https://github.com/TN13007/rpg-2d/pull/28) is merged into `main`.
 - PR [#24 — Shop purchase flow](https://github.com/TN13007/rpg-2d/pull/24) is merged. The Shop transaction flow is part of `main`.
 - PR [#30 — Shop UI redesign](https://github.com/TN13007/rpg-2d/pull/30) and PR [#31 — dialogue-driven Shop modes](https://github.com/TN13007/rpg-2d/pull/31) are merged. Shop Buy/Sell mode selection now belongs to the shared Dialogue graph.
-- The first NPC is being added by Issue [#18](https://github.com/TN13007/rpg-2d/issues/18); the shared interaction controller is being generalized from the Terminal implementation.
+- The first NPC and Terminal now share a front-facing RayCast2D interaction check. NPC dialogue is non-cancellable with Escape; Terminal interaction remains cancellable.
 
 ## Agent-owned delivery protocol
 
@@ -107,7 +107,7 @@ Do not request manual testing merely to repeat assertions already proven by reli
 
 **Current delivery:** Issue [#18 — first reusable NPC](https://github.com/TN13007/rpg-2d/issues/18) is being implemented on `feat/issue-18-first-npc`. PR #31 is merged; Shop and its dialogue-selected Buy/Sell modes are part of `main`.
 
-**Next action:** finish the shared dialogue-interactable controller, add one Villager NPC with its own dialogue, verify the NPC and Terminal scenes together, and prepare a CI-verified PR. The repository owner retains merge authority.
+**Next action:** owner playtest PR #32: verify front-facing interaction, obstacle blocking, NPC Escape lockout, Terminal Escape cancellation and the existing Shop Buy/Sell dialogue flow. The repository owner retains merge authority.
 
 ## Learning evidence
 

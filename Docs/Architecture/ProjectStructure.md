@@ -76,7 +76,7 @@ RPG-2D/
 | `scripts/bootstrap/` | Application entry point and top-level runtime composition. |
 | `scripts/features/` | Feature-owned gameplay and presentation code, grouped by domain. |
 | `scripts/features/exploration/` | Player movement, animation and player-side interaction orchestration. |
-| `scripts/features/interaction/` | Shared proximity detection for dialogue interactables, terminal/NPC scene behavior, dialogue UI and dialogue definitions/loading. |
+| `scripts/features/interaction/` | Dialogue interactable configuration, dialogue UI and dialogue definitions/loading. |
 | `scripts/features/playerdata/` | Typed item definitions, Inventory/currency state and player-data loading. |
 | `scripts/features/shop/` | Shop state and transaction rules, authored catalogue loading, and interaction UI. |
 | `Tests/` | .NET tests for pure game/domain behavior and integration seams. |
@@ -85,7 +85,7 @@ RPG-2D/
 | `Docs/Design/` | Intended player experience and accepted gameplay rules. |
 | `Docs/Architecture/` | Current code ownership, boundaries and runtime/data flows. |
 
-`DialogueInteractableController` owns the shared `InteractionArea` proximity signals and reports the current target to `PlayerInteractionController`. Each interactable scene supplies its own `DialogueId`; the player controller owns the common prompt, dialogue navigation, close behavior and movement lock. Visual identity and dialogue content stay in the NPC scene and dialogue JSON rather than in the shared controller.
+`PlayerInteractionController` uses the Player's `InteractionRayCast2D` to detect the first physics body directly in front of the facing direction. World collision bodies block the ray; interactable collision bodies resolve to their parent `DialogueInteractableController`. Each interactable scene supplies its own `DialogueId` and `CanCancelInteraction`; NPC dialogue cannot be cancelled with Escape, while Terminal interaction can. The player controller owns the prompt, dialogue navigation, cancellation check and movement lock. Visual identity and dialogue content stay in the NPC scene and dialogue JSON rather than in the shared controller.
 
 Keep scenes, scripts, data and assets separate by purpose. Keep feature-specific code near its feature. Shared code requires a real second consumer. Do not create empty classes, placeholder managers or generic abstractions to populate folders. The `.godot/` cache and generated build output must not be committed.
 

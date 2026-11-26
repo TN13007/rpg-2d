@@ -11,7 +11,11 @@ namespace RPG2D.Features.Exploration
 {
     public partial class PlayerInteractionController : Node
     {
+        private const float InteractionRange = 20.0f;
+
         private PlayerController _playerController = null!;
+        private PlayerAnimationController _playerAnimationController = null!;
+        private RayCast2D _interactionRay = null!;
         private DialogueInteractableController? _currentInteractable;
         private TerminalInteractionUI _interactionUi = null!;
         private DialogueDatabase _dialogueDatabase = null!;
@@ -28,6 +32,13 @@ namespace RPG2D.Features.Exploration
         {
             ProcessMode = ProcessModeEnum.Always;
             _playerController = GetParent<PlayerController>();
+            _playerAnimationController =
+                _playerController.GetNode<PlayerAnimationController>("PlayerAnimationController");
+            _interactionRay = GetNode<RayCast2D>("../InteractionRayCast2D");
+            _interactionRay.CollisionMask = 1;
+            _interactionRay.CollideWithAreas = false;
+            _interactionRay.CollideWithBodies = true;
+
             _dialogueDatabase = DialogueDatabase.Load();
             ItemDatabase itemDatabase = ItemDatabase.Load();
             _playerData = PlayerDataDatabase.Load(itemDatabase);
@@ -51,40 +62,41 @@ namespace RPG2D.Features.Exploration
                 return;
             }
 
+            UpdateCurrentInteractable();
+
             if (_currentInteractable != null && Input.IsActionJustPressed("interact"))
             {
                 OpenInteraction();
             }
         }
 
-        public void SetCurrentInteractable(DialogueInteractableController interactable)
+        private void UpdateCurrentInteractable()
         {
-            _currentInteractable = interactable;
+            _interactionRay.TargetPosition =
+                _playerAnimationController.FacingDirection * InteractionRange;
+            _interactionRay.ForceRaycastUpdate();
 
-            if (!_isInteractionOpen)
+            DialogueInteractableController? interactable = null;
+
+            if (_interactionRay.IsColliding() &&
+                _interactionRay.GetCollider() is Node2D collider)
             {
-                _interactionUi.SetPromptVisible(true);
+                interactable = collider.GetParent() as DialogueInteractableController;
             }
-        }
 
-        public void ClearCurrentInteractable(DialogueInteractableController interactable)
-        {
-            if (_currentInteractable != interactable)
+            if (_currentInteractable == interactable)
             {
                 return;
             }
 
-            _currentInteractable = null;
-
-            if (!_isInteractionOpen)
-            {
-                _interactionUi.SetPromptVisible(false);
-            }
+            _currentInteractable = interactable;
+            _interactionUi.SetPromptVisible(_currentInteractable != null);
         }
 
         private void HandleInteractionInput()
         {
-            if (Input.IsActionJustPressed("ui_cancel"))
+            if (Input.IsActionJustPressed("ui_cancel") &&
+                _currentInteractable?.CanCancelInteraction == true)
             {
                 CloseInteraction();
                 return;

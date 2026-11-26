@@ -9,13 +9,16 @@ namespace RPG2D.Features.Exploration
 
         private AnimationTree _animationTree = null!;
         private AnimationNodeStateMachinePlayback _animationPlayback = null!;
-        private Vector2 _facingDirection;
+        private Vector2 _facingDirection = Vector2.Up;
         private StringName _currentAnimationState = new();
+
+        public Vector2 FacingDirection => _facingDirection;
 
         public override void _Ready()
         {
             _animationTree = GetNode<AnimationTree>("../AnimationTree");
             _animationTree.Active = true;
+            SetAnimationFacingDirection(_facingDirection);
 
             _animationPlayback = _animationTree
                 .Get("parameters/playback")
@@ -35,11 +38,17 @@ namespace RPG2D.Features.Exploration
             if (facingDirection != _facingDirection)
             {
                 _facingDirection = facingDirection;
-                _animationTree.Set("parameters/Idle/blend_position", _facingDirection);
-                _animationTree.Set("parameters/Walk/blend_position", _facingDirection);
+                SetAnimationFacingDirection(_facingDirection);
             }
 
             TransitionTo(_walkState);
+        }
+
+        private void SetAnimationFacingDirection(Vector2 direction)
+        {
+            Vector2 blendPosition = new(direction.X, -direction.Y);
+            _animationTree.Set("parameters/Idle/blend_position", blendPosition);
+            _animationTree.Set("parameters/Walk/blend_position", blendPosition);
         }
 
         private static Vector2 GetFacingDirection(Vector2 movement)
@@ -49,7 +58,7 @@ namespace RPG2D.Features.Exploration
                 return new Vector2(Mathf.Sign(movement.X), 0.0f);
             }
 
-            return new Vector2(0.0f, -Mathf.Sign(movement.Y));
+            return new Vector2(0.0f, Mathf.Sign(movement.Y));
         }
 
         private void TransitionTo(StringName targetState)
