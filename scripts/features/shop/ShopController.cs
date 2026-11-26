@@ -12,10 +12,10 @@ namespace RPG2D.Features.Shop
         private PlayerDataState? _playerData;
         private ItemDatabase? _itemDatabase;
         private ShopInteractionUI _shopUi = null!;
-        private ShopData? _session;
+        private ShopData? _shopData;
         private bool _tabWasPressed;
 
-        public bool IsOpen => _session != null && _shopUi.IsShopVisible;
+        public bool IsOpen => _shopData != null && _shopUi.IsShopVisible;
 
         public override void _Ready()
         {
@@ -50,7 +50,7 @@ namespace RPG2D.Features.Shop
                 return false;
             }
 
-            _session = new ShopData(shop, _playerData, _itemDatabase);
+            _shopData = new ShopData(shop, _playerData, _itemDatabase);
             _tabWasPressed = false;
             RefreshUI();
             return true;
@@ -58,14 +58,14 @@ namespace RPG2D.Features.Shop
 
         public void Close()
         {
-            _session = null;
+            _shopData = null;
             _tabWasPressed = false;
             _shopUi.HideShop();
         }
 
         public void HandleInput()
         {
-            if (!IsOpen || _session == null)
+            if (!IsOpen || _shopData == null)
             {
                 return;
             }
@@ -73,7 +73,7 @@ namespace RPG2D.Features.Shop
             bool tabPressed = Input.IsKeyPressed(Key.Tab);
             if (tabPressed && !_tabWasPressed)
             {
-                ShopMode nextMode = _session.Mode == ShopMode.Buying
+                ShopMode nextMode = _shopData.Mode == ShopMode.Buying
                     ? ShopMode.Selling
                     : ShopMode.Buying;
                 SetMode(nextMode);
@@ -85,28 +85,28 @@ namespace RPG2D.Features.Shop
 
             if (Input.IsActionJustPressed("interaction_menu_up"))
             {
-                _session.MoveSelection(-1);
+                _shopData.MoveSelection(-1);
                 RefreshDetails();
                 return;
             }
 
             if (Input.IsActionJustPressed("interaction_menu_down"))
             {
-                _session.MoveSelection(1);
+                _shopData.MoveSelection(1);
                 RefreshDetails();
                 return;
             }
 
             if (Input.IsActionJustPressed("move_left"))
             {
-                _session.ChangeQuantity(-1);
+                _shopData.ChangeQuantity(-1);
                 RefreshDetails();
                 return;
             }
 
             if (Input.IsActionJustPressed("move_right"))
             {
-                _session.ChangeQuantity(1);
+                _shopData.ChangeQuantity(1);
                 RefreshDetails();
                 return;
             }
@@ -119,45 +119,45 @@ namespace RPG2D.Features.Shop
 
         private void SetMode(ShopMode mode)
         {
-            if (_session == null)
+            if (_shopData == null)
             {
                 return;
             }
 
-            _session.SetMode(mode);
+            _shopData.SetMode(mode);
             RefreshUI();
         }
 
         private void SelectItem(int index)
         {
-            if (_session == null)
+            if (_shopData == null)
             {
                 return;
             }
 
-            _session.SelectItem(index);
+            _shopData.SelectItem(index);
             RefreshDetails();
         }
 
         private void ConfirmItem(int index)
         {
-            if (_session == null)
+            if (_shopData == null)
             {
                 return;
             }
 
-            _session.SelectItem(index);
+            _shopData.SelectItem(index);
             ConfirmSelection();
         }
 
         private void ConfirmSelection()
         {
-            if (_session == null)
+            if (_shopData == null)
             {
                 return;
             }
 
-            ShopDataOutcome outcome = _session.ConfirmSelection();
+            ShopDataOutcome outcome = _shopData.ConfirmSelection();
             if (outcome == ShopDataOutcome.LeaveRequested)
             {
                 LeaveRequested?.Invoke();
@@ -169,33 +169,33 @@ namespace RPG2D.Features.Shop
 
         private void AdjustCurrency(bool increase)
         {
-            if (_session == null)
+            if (_shopData == null)
             {
                 return;
             }
 
-            _session.AdjustCurrency(increase);
+            _shopData.AdjustCurrency(increase);
             RefreshDetails();
         }
 
         private void RefreshUI()
         {
-            if (_session == null)
+            if (_shopData == null)
             {
                 return;
             }
 
-            _shopUi.ShowShop(_session.CreateView());
+            _shopUi.ShowShop(_shopData.CreateView());
         }
 
         private void RefreshDetails()
         {
-            if (_session == null)
+            if (_shopData == null)
             {
                 return;
             }
 
-            _shopUi.RefreshDetails(_session.CreateView());
+            _shopUi.RefreshDetails(_shopData.CreateView());
         }
     }
 }

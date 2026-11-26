@@ -157,35 +157,21 @@ namespace RPG2D.Tests
         }
 
         [Fact]
-        public void Presenter_WhenBuying_FormatsCatalogDetails()
+        public void CreateView_WhenBuying_ReturnsCatalogAndCurrentPlayerData()
         {
             ItemDatabase itemDatabase = CreateItemDatabase();
-            ShopData session = new(CreateShop(), new PlayerData(500), itemDatabase);
+            PlayerData playerData = new(500);
+            ShopData shopData = new(CreateShop(), playerData, itemDatabase);
 
-            ShopInteractionPresentation presentation =
-                ShopInteractionPresenter.Create(session.CreateView());
+            ShopDataView view = shopData.CreateView();
 
-            Assert.Equal("Hàng hóa", presentation.ListHeading);
-            Assert.Equal("Đồ A", presentation.ItemNames[0]);
-            Assert.Equal("Giá mua: 100 vàng / món", presentation.Details.Price);
-        }
-
-        [Fact]
-        public void Presenter_WhenSelling_FormatsUnavailableItems()
-        {
-            ItemDatabase itemDatabase = CreateItemDatabase();
-            PlayerData playerData = new();
-            Assert.True(playerData.TryAddItem(GetItem(itemDatabase, "ancient_key"), 1));
-
-            ShopData session = new(CreateShop(), playerData, itemDatabase);
-            session.SetMode(ShopMode.Selling);
-
-            ShopInteractionPresentation presentation =
-                ShopInteractionPresenter.Create(session.CreateView());
-
-            Assert.Equal("Vật phẩm đang sở hữu", presentation.ListHeading);
-            Assert.Equal("Chìa khóa cổ ×1 (không thu mua)", presentation.ItemNames[0]);
-            Assert.Equal("Cửa hàng không thu mua vật phẩm này.", presentation.Details.Price);
+            Assert.Equal("Cửa hàng thử nghiệm", view.ShopName);
+            Assert.Equal(ShopMode.Buying, view.Mode);
+            Assert.Equal(500, view.Currency);
+            Assert.Single(view.Items);
+            Assert.Equal("item_a", view.Items[0].ItemId);
+            Assert.Equal(5, view.Items[0].Stock);
+            Assert.Equal(1, view.SelectedQuantity);
         }
 
         private static Item GetItem(ItemDatabase itemDatabase, string itemId)
