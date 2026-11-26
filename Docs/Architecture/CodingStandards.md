@@ -83,6 +83,14 @@ The initial validator checks changed JSON documents and a small explicit set of 
 - Do not introduce a global service locator, generic EventBus, Manager or Repository without a concrete requirement.
 - Do not create architecture layers merely to mirror folders.
 
+### Feature naming
+- Keep code under `scripts/features/<domain>/` and use domain-first PascalCase class names.
+- Reuse the role vocabulary already established by the project: `<Domain>Controller` for feature coordination, `<Domain>InteractionUI` for interaction presentation, `<Domain>Data` for runtime state, and `<Domain>Database` for loading authored definitions.
+- Add qualifiers such as `Interaction` or `Animation` only when they distinguish a real responsibility, as in `PlayerInteractionController` and `PlayerAnimationController`.
+- Prefer an existing role name over introducing a one-off suffix such as `Session` or `Presenter`. Introduce a new role only when it represents a genuinely distinct responsibility and document why the feature needs it.
+- Keep the primary class name aligned with the file name. Related small definitions may share a file when they belong to the same domain contract, as with `ItemDatabase` and its manifest.
+
+
 ## Godot lifecycle
 - Use the appropriate Godot lifecycle callback; separate initialization from per-frame work.
 - Cache node references when needed rather than repeatedly searching the tree in hot paths.
