@@ -5,13 +5,13 @@ This document defines the prototype Shop's purchase and sell behavior and its co
 ## Runtime ownership and responsibilities
 
 - `PlayerInteractionController` creates one shared `ItemDatabase` and one shared `PlayerData` instance.
-- `ShopInteractionController` is the Godot adapter. It receives player data, translates keyboard and UI events into Shop session commands, refreshes the visible screen and reports when the player leaves the Shop.
-- `ShopSession` owns the active Shop state: buy/sell mode, selected item and quantity, purchase stock, sellable Inventory options, and purchase/sale actions. It contains no Godot UI nodes and can be tested without rendering.
-- `ShopInteractionPresenter` converts a `ShopSessionView` snapshot into player-facing labels, details and feedback. Copy or display-format changes belong here rather than in the session or interaction controller.
-- `ShopInteractionUI` creates and renders Godot controls. It raises events for player intent but does not make purchase or sale decisions.
-- `PlayerData` remains the source of truth for owned item quantities and currency. `ShopSession` delegates player-side changes to `PlayerData.TryPurchaseItem` and `PlayerData.TrySellItem`.
+- `ShopController` is the Godot controller. It receives shared player data, translates keyboard and UI events into Shop data commands, refreshes the screen and reports when the player leaves the Shop.
+- `ShopData` owns runtime Shop state and behavior: buy/sell mode, selection, quantity, purchase stock, sellable Inventory options and purchase/sale actions. It contains no Godot UI nodes.
+- `ShopDatabase` loads the authored Shop definition from `res://data/shops/default_shop.json`.
+- `ShopInteractionUI` builds and renders Godot controls, formats Shop data into player-facing labels/details, and raises events for player intent. It does not perform purchase or sale transactions.
+- `PlayerData` remains the source of truth for owned item quantities and currency. `ShopData` delegates player-side changes to `PlayerData.TryPurchaseItem` and `PlayerData.TrySellItem`.
 - NPC dialogue content remains in `data/dialogues/dialogues.json`. The dialogue interaction flow handles the `openShop` action; Shop does not own NPC dialogue text.
-- The current Shop has no VFX behavior. UI selection styling is part of `ShopInteractionUI`; future effects should remain separate from the session and transaction rules.
+- The current Shop has no VFX behavior. UI selection styling is part of `ShopInteractionUI`; future effects should remain separate from Shop rules and transactions.
 
 ## Purchase catalogue
 
@@ -21,13 +21,13 @@ The `items` array defines goods the Shop sells to the player:
 |---|---|
 | `itemId` | Existing ID from `data/items/items.json` |
 | `price` | Player's purchase price per item |
-| `stock` | Current shop stock for this runtime session |
+| `stock` | Current Shop stock for this runtime session |
 
 A purchase uses `PlayerData.TryPurchaseItem`. Shop stock decreases only after the player-side transaction succeeds. Failed purchases leave currency, Inventory and stock unchanged.
 
 ## Selling from the player's Inventory
 
-The sell list is not loaded from the Shop's buy catalogue. It is generated from `PlayerData.Inventory` whenever the session view is requested.
+The sell list is generated from `PlayerData.Inventory` whenever `ShopData` creates a view of the current Shop state.
 
 - Each distinct `ItemId` appears once, with quantities from all of its Inventory stacks combined.
 - The displayed quantity is the amount currently owned, not Shop stock.
@@ -85,8 +85,8 @@ The currency adjustment buttons are prototype test controls and are not part of 
 
 - Buy an item and confirm currency, Inventory and Shop stock update once.
 - Sell one unit from a stack and confirm only that quantity is removed.
-- Sell the remaining quantity and confirm the item disappears from the sell list.
-- Sell an item represented by multiple Inventory stacks and confirm removal spans those stacks.
+- Sell the remaining quantity and confirm the row disappears from the Shop view.
+- Sell an item represented by multiple Inventory stacks and confirm removal spans stacks.
 - Attempt to sell more than owned, an unaccepted item or an invalid quantity; confirm no player data changes.
 - Attempt a sale that would overflow the currency balance; confirm Inventory and currency remain unchanged.
 - Switch between tabs, leave the Shop and close the interaction; confirm existing dialogue and player control remain functional.

@@ -1,125 +1,434 @@
 using System;
 using System.Collections.Generic;
-using System.Text.Json;
-using System.Text.Json.Serialization;
-using Godot;
+using RPG2D.Features.PlayerData;
+using PlayerDataState = RPG2D.Features.PlayerData.PlayerData;
 
 namespace RPG2D.Features.Shop
 {
-    public sealed class ShopItemDefinition
+    public enum ShopMode
     {
-        [JsonPropertyName("itemId")]
-        public string ItemId { get; set; } = string.Empty;
-
-        [JsonPropertyName("price")]
-        public int Price { get; set; }
-
-        [JsonPropertyName("stock")]
-        public int Stock { get; set; }
+        Buying,
+        Selling
     }
 
-    public sealed class ShopBuybackDefinition
+    public enum ShopDataOutcome
     {
-        [JsonPropertyName("itemId")]
-        public string ItemId { get; set; } = string.Empty;
-
-        [JsonPropertyName("price")]
-        public int Price { get; set; }
+        None,
+        LeaveRequested
     }
 
-    public sealed class ShopDefinition
+    public enum ShopFeedbackKind
     {
-        [JsonPropertyName("id")]
-        public string Id { get; set; } = string.Empty;
+        None,
+        Error,
+        ItemNotAccepted,
+        PurchaseSucceeded,
+        SaleSucceeded,
+        CurrencyAdded,
+        CurrencyAddFailed,
+        CurrencySpent,
+        CurrencySpendFailed
+    }
 
-        [JsonPropertyName("name")]
-        public string Name { get; set; } = string.Empty;
-
-        [JsonPropertyName("items")]
-        public List<ShopItemDefinition> Items { get; set; } = new();
-
-        [JsonPropertyName("buybackPrices")]
-        public List<ShopBuybackDefinition> BuybackPrices { get; set; } = new();
-
-        public bool TryGetBuybackPrice(string itemId, out int price)
+    public sealed class ShopFeedback
+    {
+        public ShopFeedback(
+            ShopFeedbackKind kind,
+            string message = "",
+            string itemName = "",
+            int quantity = 0,
+            long amount = 0
+        )
         {
-            price = 0;
-            if (string.IsNullOrWhiteSpace(itemId))
+            Kind = kind;
+            Message = message;
+            ItemName = itemName;
+            Quantity = quantity;
+            Amount = amount;
+        }
+
+        public ShopFeedbackKind Kind { get; }
+        public string Message { get; }
+        public string ItemName { get; }
+        public int Quantity { get; }
+        public long Amount { get; }
+
+        public static ShopFeedback None => new(ShopFeedbackKind.None);
+    }
+
+    public sealed class ShopItemOption
+    {
+        public ShopItemOption(
+            string itemId,
+            Item? item,
+            int unitPrice,
+            int stock,
+            int ownedQuantity,
+            bool isAvailable
+        )
+        {
+            ItemId = itemId;
+            Item = item;
+            UnitPrice = unitPrice;
+            Stock = stock;
+            OwnedQuantity = ownedQuantity;
+            IsAvailable = isAvailable;
+        }
+
+        public string ItemId { get; }
+        public Item? Item { get; }
+        public int UnitPrice { get; }
+        public int Stock { get; }
+        public int OwnedQuantity { get; }
+        public bool IsAvailable { get; }
+    }
+
+    public sealed class ShopDataView
+    {
+        public ShopDataView(
+            string shopName,
+            ShopMode mode,
+            IReadOnlyList<ShopItemOption> items,
+            int selectedIndex,
+            int selectedQuantity,
+            int currency,
+            bool inventoryIsEmpty,
+            ShopFeedback feedback
+        )
+        {
+            ShopName = shopName;
+            Mode = mode;
+            Items = items;
+            SelectedIndex = selectedIndex;
+            SelectedQuantity = selectedQuantity;
+            Currency = currency;
+            InventoryIsEmpty = inventoryIsEmpty;
+            Feedback = feedback;
+        }
+
+        public string ShopName { get; }
+        public ShopMode Mode { get; }
+        public IReadOnlyList<ShopItemOption> Items { get; }
+        public int SelectedIndex { get; }
+        public int SelectedQuantity { get; }
+        public int Currency { get; }
+        public bool InventoryIsEmpty { get; }
+        public ShopFeedback Feedback { get; }
+    }
+
+    public sealed class ShopData
+    {
+        private const int DebugCurrencyAmount = 1000;
+
+        private readonly ShopDefinition _shop;
+        private readonly PlayerDataState _playerData;
+        private readonly ItemDatabase _itemDatabase;
+
+        private ShopMode _mode = ShopMode.Buying;
+        private int _selectedIndex;
+        private int _selectedQuantity = 1;
+        private ShopFeedback _feedback = ShopFeedback.None;
+
+        public ShopData(
+            ShopDefinition shop,
+            PlayerDataState playerData,
+            ItemDatabase itemDatabase
+        )
+        {
+            _shop = shop ?? throw new ArgumentNullException(nameof(shop));
+            _playerData = playerData ?? throw new ArgumentNullException(nameof(playerData));
+            _itemDatabase = itemDatabase ?? throw new ArgumentNullException(nameof(itemDatabase));
+        }
+
+        public ShopMode Mode => _mode;
+
+        public void SetMode(ShopMode mode)
+        {
+            if (_mode == mode)
             {
-                return false;
+                return;
             }
 
-            foreach (ShopBuybackDefinition entry in BuybackPrices)
+            _mode = mode;
+            _selectedIndex = Math.Clamp(_selectedIndex, 0, BuildItems().Count);
+            _selectedQuantity = 1;
+            _feedback = ShopFeedback.None;
+        }
+
+        public void MoveSelection(int direction)
+        {
+            int optionCount = BuildItems().Count + 1;
+            if (optionCount <= 0 || direction == 0)
             {
-                if (string.Equals(entry.ItemId, itemId, StringComparison.OrdinalIgnoreCase) &&
-                    entry.Price > 0)
+                return;
+            }
+
+            int nextIndex = _selectedIndex + direction;
+            _selectedIndex = ((nextIndex % optionCount) + optionCount) % optionCount;
+            _selectedQuantity = 1;
+            _feedback = ShopFeedback.None;
+        }
+
+        public void SelectItem(int index)
+        {
+            int itemCount = BuildItems().Count;
+            if (index < 0 || index > itemCount)
+            {
+                return;
+            }
+
+            _selectedIndex = index;
+            _selectedQuantity = 1;
+            _feedback = ShopFeedback.None;
+        }
+
+        public void ChangeQuantity(int direction)
+        {
+            List<ShopItemOption> items = BuildItems();
+            if (direction == 0 || _selectedIndex < 0 || _selectedIndex >= items.Count)
+            {
+                return;
+            }
+
+            ShopItemOption option = items[_selectedIndex];
+            if (!option.IsAvailable)
+            {
+                return;
+            }
+
+            int maximumQuantity = _mode == ShopMode.Buying
+                ? option.Stock
+                : option.OwnedQuantity;
+            long nextQuantity = (long)_selectedQuantity + direction;
+
+            if (nextQuantity < 1 || nextQuantity > maximumQuantity)
+            {
+                return;
+            }
+
+            _selectedQuantity = (int)nextQuantity;
+            _feedback = ShopFeedback.None;
+        }
+
+        public ShopDataOutcome ConfirmSelection()
+        {
+            List<ShopItemOption> items = BuildItems();
+            if (_selectedIndex == items.Count)
+            {
+                return ShopDataOutcome.LeaveRequested;
+            }
+
+            if (_selectedIndex < 0 || _selectedIndex >= items.Count)
+            {
+                return ShopDataOutcome.None;
+            }
+
+            if (_mode == ShopMode.Buying)
+            {
+                ConfirmPurchase();
+            }
+            else
+            {
+                ConfirmSale(items[_selectedIndex]);
+            }
+
+            return ShopDataOutcome.None;
+        }
+
+        public void AdjustCurrency(bool increase)
+        {
+            if (increase)
+            {
+                _feedback = _playerData.TryAddCurrency(DebugCurrencyAmount)
+                    ? new ShopFeedback(
+                        ShopFeedbackKind.CurrencyAdded,
+                        amount: DebugCurrencyAmount
+                    )
+                    : new ShopFeedback(ShopFeedbackKind.CurrencyAddFailed);
+                return;
+            }
+
+            _feedback = _playerData.TrySpendCurrency(DebugCurrencyAmount)
+                ? new ShopFeedback(
+                    ShopFeedbackKind.CurrencySpent,
+                    amount: DebugCurrencyAmount
+                )
+                : new ShopFeedback(
+                    ShopFeedbackKind.CurrencySpendFailed,
+                    amount: DebugCurrencyAmount
+                );
+        }
+
+        public ShopDataView CreateView()
+        {
+            List<ShopItemOption> items = BuildItems();
+            _selectedIndex = Math.Clamp(_selectedIndex, 0, items.Count);
+
+            return new ShopDataView(
+                _shop.Name,
+                _mode,
+                items.AsReadOnly(),
+                _selectedIndex,
+                _selectedQuantity,
+                _playerData.Currency,
+                _mode == ShopMode.Selling && items.Count == 0,
+                _feedback
+            );
+        }
+
+        private List<ShopItemOption> BuildItems()
+        {
+            return _mode == ShopMode.Buying
+                ? BuildPurchaseItems()
+                : BuildOwnedItems();
+        }
+
+        private List<ShopItemOption> BuildPurchaseItems()
+        {
+            List<ShopItemOption> items = new();
+
+            foreach (ShopItemDefinition shopItem in _shop.Items)
+            {
+                bool hasItem = _itemDatabase.TryGetItem(shopItem.ItemId, out Item item);
+                items.Add(
+                    new ShopItemOption(
+                        shopItem.ItemId,
+                        hasItem ? item : null,
+                        shopItem.Price,
+                        shopItem.Stock,
+                        0,
+                        hasItem
+                    )
+                );
+            }
+
+            return items;
+        }
+
+        private List<ShopItemOption> BuildOwnedItems()
+        {
+            List<ShopItemOption> items = new();
+            Dictionary<string, int> optionIndexes = new(StringComparer.OrdinalIgnoreCase);
+
+            foreach (PlayerItemStack stack in _playerData.Inventory)
+            {
+                if (optionIndexes.TryGetValue(stack.ItemId, out int existingIndex))
                 {
-                    price = entry.Price;
-                    return true;
+                    ShopItemOption existingOption = items[existingIndex];
+                    items[existingIndex] = new ShopItemOption(
+                        existingOption.ItemId,
+                        existingOption.Item,
+                        existingOption.UnitPrice,
+                        existingOption.Stock,
+                        existingOption.OwnedQuantity + stack.Quantity,
+                        existingOption.IsAvailable
+                    );
+                    continue;
                 }
+
+                int buybackPrice = _shop.TryGetBuybackPrice(stack.ItemId, out int configuredPrice)
+                    ? configuredPrice
+                    : 0;
+
+                optionIndexes.Add(stack.ItemId, items.Count);
+                items.Add(
+                    new ShopItemOption(
+                        stack.ItemId,
+                        stack.Item,
+                        buybackPrice,
+                        0,
+                        stack.Quantity,
+                        buybackPrice > 0
+                    )
+                );
             }
 
-            return false;
-        }
-    }
-
-    public static class ShopDatabase
-    {
-        private const string DefaultShopPath = "res://data/shops/default_shop.json";
-
-        public static ShopDefinition? LoadDefaultShop()
-        {
-            Godot.FileAccess? file = Godot.FileAccess.Open(
-                DefaultShopPath,
-                Godot.FileAccess.ModeFlags.Read
-            );
-
-            if (file == null)
-            {
-                GD.PushWarning($"Could not read shop data '{DefaultShopPath}'.");
-                return null;
-            }
-
-            string json = file.GetAsText();
-            file.Close();
-
-            try
-            {
-                return FromJson(json);
-            }
-            catch (JsonException exception)
-            {
-                GD.PushWarning($"Invalid shop JSON in '{DefaultShopPath}': {exception.Message}");
-                return null;
-            }
+            return items;
         }
 
-        public static ShopDefinition FromJson(string json)
+        private void ConfirmPurchase()
         {
-            ShopDefinition? shop = JsonSerializer.Deserialize<ShopDefinition>(json);
-            if (shop == null ||
-                string.IsNullOrWhiteSpace(shop.Id) ||
-                string.IsNullOrWhiteSpace(shop.Name) ||
-                shop.Items == null ||
-                shop.BuybackPrices == null)
+            ShopItemDefinition shopItem = _shop.Items[_selectedIndex];
+            if (!_itemDatabase.TryGetItem(shopItem.ItemId, out Item item))
             {
-                throw new JsonException("Shop data must contain an id, name, items and buybackPrices.");
+                _feedback = new ShopFeedback(
+                    ShopFeedbackKind.Error,
+                    "Không tìm thấy dữ liệu vật phẩm."
+                );
+                return;
             }
 
-            shop.Items.RemoveAll(
-                item => string.IsNullOrWhiteSpace(item.ItemId) ||
-                    item.Price < 0 ||
-                    item.Stock < 0
+            if (shopItem.Stock < _selectedQuantity)
+            {
+                _feedback = new ShopFeedback(
+                    ShopFeedbackKind.Error,
+                    "Số lượng hàng trong cửa hàng không đủ."
+                );
+                return;
+            }
+
+            if (!_playerData.TryPurchaseItem(
+                item,
+                shopItem.Price,
+                _selectedQuantity,
+                out string failureReason
+            ))
+            {
+                _feedback = new ShopFeedback(ShopFeedbackKind.Error, failureReason);
+                return;
+            }
+
+            shopItem.Stock -= _selectedQuantity;
+            _feedback = new ShopFeedback(
+                ShopFeedbackKind.PurchaseSucceeded,
+                itemName: item.Name,
+                quantity: _selectedQuantity
+            );
+        }
+
+        private void ConfirmSale(ShopItemOption option)
+        {
+            if (!option.IsAvailable)
+            {
+                _feedback = new ShopFeedback(ShopFeedbackKind.ItemNotAccepted);
+                return;
+            }
+
+            int quantity = _selectedQuantity;
+            long totalRevenue = (long)option.UnitPrice * quantity;
+            string soldItemId = option.ItemId;
+            string soldItemName = option.Item?.Name ?? option.ItemId;
+
+            if (!_playerData.TrySellItem(
+                soldItemId,
+                option.UnitPrice,
+                quantity,
+                out string failureReason
+            ))
+            {
+                _feedback = new ShopFeedback(ShopFeedbackKind.Error, failureReason);
+                return;
+            }
+
+            _feedback = new ShopFeedback(
+                ShopFeedbackKind.SaleSucceeded,
+                itemName: soldItemName,
+                quantity: quantity,
+                amount: totalRevenue
             );
 
-            HashSet<string> seenBuybackItems = new(StringComparer.OrdinalIgnoreCase);
-            shop.BuybackPrices.RemoveAll(
-                entry => string.IsNullOrWhiteSpace(entry.ItemId) ||
-                    entry.Price <= 0 ||
-                    !seenBuybackItems.Add(entry.ItemId)
+            List<ShopItemOption> updatedItems = BuildOwnedItems();
+            int preferredIndex = updatedItems.FindIndex(
+                item => string.Equals(
+                    item.ItemId,
+                    soldItemId,
+                    StringComparison.OrdinalIgnoreCase
+                )
             );
-
-            return shop;
+            _selectedIndex = preferredIndex >= 0
+                ? preferredIndex
+                : Math.Min(_selectedIndex, updatedItems.Count);
+            _selectedQuantity = 1;
         }
     }
 }

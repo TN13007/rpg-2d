@@ -5,14 +5,14 @@ using PlayerDataState = RPG2D.Features.PlayerData.PlayerData;
 
 namespace RPG2D.Features.Shop
 {
-    public partial class ShopInteractionController : Node
+    public partial class ShopController : Node
     {
         public event Action? LeaveRequested;
 
         private PlayerDataState? _playerData;
         private ItemDatabase? _itemDatabase;
         private ShopInteractionUI _shopUi = null!;
-        private ShopSession? _session;
+        private ShopData? _session;
         private bool _tabWasPressed;
 
         public bool IsOpen => _session != null && _shopUi.IsShopVisible;
@@ -39,7 +39,7 @@ namespace RPG2D.Features.Shop
         {
             if (_playerData == null || _itemDatabase == null)
             {
-                GD.PushError("ShopInteractionController must be configured before opening.");
+                GD.PushError("ShopController must be configured before opening.");
                 return false;
             }
 
@@ -50,7 +50,7 @@ namespace RPG2D.Features.Shop
                 return false;
             }
 
-            _session = new ShopSession(shop, _playerData, _itemDatabase);
+            _session = new ShopData(shop, _playerData, _itemDatabase);
             _tabWasPressed = false;
             RefreshUI();
             return true;
@@ -157,8 +157,8 @@ namespace RPG2D.Features.Shop
                 return;
             }
 
-            ShopSessionOutcome outcome = _session.ConfirmSelection();
-            if (outcome == ShopSessionOutcome.LeaveRequested)
+            ShopDataOutcome outcome = _session.ConfirmSelection();
+            if (outcome == ShopDataOutcome.LeaveRequested)
             {
                 LeaveRequested?.Invoke();
                 return;
@@ -185,18 +185,7 @@ namespace RPG2D.Features.Shop
                 return;
             }
 
-            ShopInteractionPresentation presentation =
-                ShopInteractionPresenter.Create(_session.CreateView());
-
-            _shopUi.ShowShop(
-                presentation.Title,
-                presentation.ListHeading,
-                presentation.ItemNames,
-                presentation.SelectedIndex,
-                presentation.IsBuying
-            );
-
-            ShowDetails(presentation.Details);
+            _shopUi.ShowShop(_session.CreateView());
         }
 
         private void RefreshDetails()
@@ -206,24 +195,7 @@ namespace RPG2D.Features.Shop
                 return;
             }
 
-            ShopInteractionPresentation presentation =
-                ShopInteractionPresenter.Create(_session.CreateView());
-
-            _shopUi.SetSelectedItem(presentation.SelectedIndex);
-            ShowDetails(presentation.Details);
-        }
-
-        private void ShowDetails(ShopDetailsPresentation details)
-        {
-            _shopUi.ShowDetails(
-                details.Name,
-                details.Description,
-                details.Price,
-                details.Stock,
-                details.Currency,
-                details.Quantity,
-                details.Feedback
-            );
+            _shopUi.RefreshDetails(_session.CreateView());
         }
     }
 }

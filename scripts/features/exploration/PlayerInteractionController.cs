@@ -16,7 +16,7 @@ namespace RPG2D.Features.Exploration
         private TerminalInteractionUI _interactionUi = null!;
         private DialogueDatabase _dialogueDatabase = null!;
         private PlayerDataState _playerData = null!;
-        private ShopInteractionController _shopController = null!;
+        private ShopController _shopController = null!;
         private DialogueDefinition? _currentDialogue;
         private IReadOnlyList<DialogueChoiceDefinition> _choiceOptions =
             Array.Empty<DialogueChoiceDefinition>();
@@ -37,7 +37,7 @@ namespace RPG2D.Features.Exploration
             _interactionUi.ChoiceHovered += SelectChoice;
             _interactionUi.ChoiceConfirmed += OnChoiceConfirmed;
 
-            _shopController = new ShopInteractionController();
+            _shopController = new ShopController();
             AddChild(_shopController);
             _shopController.Configure(_playerData, itemDatabase);
             _shopController.LeaveRequested += ReturnToDialogueMenu;

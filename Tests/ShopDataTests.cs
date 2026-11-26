@@ -4,7 +4,7 @@ using Xunit;
 
 namespace RPG2D.Tests
 {
-    public sealed class ShopSessionTests
+    public sealed class ShopDataTests
     {
         private static ItemDatabase CreateItemDatabase()
         {
@@ -73,13 +73,13 @@ namespace RPG2D.Tests
         {
             ItemDatabase itemDatabase = CreateItemDatabase();
             PlayerData playerData = new(500);
-            ShopSession session = new(CreateShop(), playerData, itemDatabase);
+            ShopData session = new(CreateShop(), playerData, itemDatabase);
 
             session.ChangeQuantity(1);
-            ShopSessionOutcome outcome = session.ConfirmSelection();
-            ShopSessionView view = session.CreateView();
+            ShopDataOutcome outcome = session.ConfirmSelection();
+            ShopDataView view = session.CreateView();
 
-            Assert.Equal(ShopSessionOutcome.None, outcome);
+            Assert.Equal(ShopDataOutcome.None, outcome);
             Assert.Equal(300, playerData.Currency);
             Assert.Equal(2, playerData.GetItemQuantity("item_a"));
             Assert.Equal(3, view.Items[0].Stock);
@@ -94,9 +94,9 @@ namespace RPG2D.Tests
             PlayerData playerData = new();
             Assert.True(playerData.TryAddItem(potion, 3));
 
-            ShopSession session = new(CreateShop(), playerData, itemDatabase);
+            ShopData session = new(CreateShop(), playerData, itemDatabase);
             session.SetMode(ShopMode.Selling);
-            ShopSessionView view = session.CreateView();
+            ShopDataView view = session.CreateView();
 
             Assert.Single(view.Items);
             Assert.Equal("health_potion", view.Items[0].ItemId);
@@ -112,13 +112,13 @@ namespace RPG2D.Tests
             PlayerData playerData = new();
             Assert.True(playerData.TryAddItem(potion, 3));
 
-            ShopSession session = new(CreateShop(), playerData, itemDatabase);
+            ShopData session = new(CreateShop(), playerData, itemDatabase);
             session.SetMode(ShopMode.Selling);
             session.ChangeQuantity(1);
-            ShopSessionOutcome outcome = session.ConfirmSelection();
-            ShopSessionView view = session.CreateView();
+            ShopDataOutcome outcome = session.ConfirmSelection();
+            ShopDataView view = session.CreateView();
 
-            Assert.Equal(ShopSessionOutcome.None, outcome);
+            Assert.Equal(ShopDataOutcome.None, outcome);
             Assert.Equal(80, playerData.Currency);
             Assert.Equal(1, playerData.GetItemQuantity("health_potion"));
             Assert.Equal(1, view.Items[0].OwnedQuantity);
@@ -133,10 +133,10 @@ namespace RPG2D.Tests
             PlayerData playerData = new(25);
             Assert.True(playerData.TryAddItem(key, 1));
 
-            ShopSession session = new(CreateShop(), playerData, itemDatabase);
+            ShopData session = new(CreateShop(), playerData, itemDatabase);
             session.SetMode(ShopMode.Selling);
             session.ConfirmSelection();
-            ShopSessionView view = session.CreateView();
+            ShopDataView view = session.CreateView();
 
             Assert.Equal(25, playerData.Currency);
             Assert.Equal(1, playerData.GetItemQuantity("ancient_key"));
@@ -149,18 +149,18 @@ namespace RPG2D.Tests
         {
             ItemDatabase itemDatabase = CreateItemDatabase();
             PlayerData playerData = new();
-            ShopSession session = new(CreateShop(), playerData, itemDatabase);
+            ShopData session = new(CreateShop(), playerData, itemDatabase);
 
             session.MoveSelection(1);
 
-            Assert.Equal(ShopSessionOutcome.LeaveRequested, session.ConfirmSelection());
+            Assert.Equal(ShopDataOutcome.LeaveRequested, session.ConfirmSelection());
         }
 
         [Fact]
         public void Presenter_WhenBuying_FormatsCatalogDetails()
         {
             ItemDatabase itemDatabase = CreateItemDatabase();
-            ShopSession session = new(CreateShop(), new PlayerData(500), itemDatabase);
+            ShopData session = new(CreateShop(), new PlayerData(500), itemDatabase);
 
             ShopInteractionPresentation presentation =
                 ShopInteractionPresenter.Create(session.CreateView());
@@ -177,7 +177,7 @@ namespace RPG2D.Tests
             PlayerData playerData = new();
             Assert.True(playerData.TryAddItem(GetItem(itemDatabase, "ancient_key"), 1));
 
-            ShopSession session = new(CreateShop(), playerData, itemDatabase);
+            ShopData session = new(CreateShop(), playerData, itemDatabase);
             session.SetMode(ShopMode.Selling);
 
             ShopInteractionPresentation presentation =
