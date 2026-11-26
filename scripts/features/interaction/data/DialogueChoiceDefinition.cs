@@ -1,3 +1,4 @@
+using System;
 using System.Text.Json.Serialization;
 
 namespace RPG2D.Features.Interaction.Data
@@ -12,6 +13,15 @@ namespace RPG2D.Features.Interaction.Data
 
         [JsonPropertyName("action")]
         public string Action { get; set; } = string.Empty;
+
+        [JsonPropertyName("shopMode")]
+        public string ShopMode { get; set; } = string.Empty;
+
+        public static bool IsSupportedShopMode(string shopMode)
+        {
+            return string.Equals(shopMode, "Buying", StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(shopMode, "Selling", StringComparison.OrdinalIgnoreCase);
+        }
 
         [JsonPropertyName("closesInteraction")]
         public bool ClosesInteraction { get; set; }
