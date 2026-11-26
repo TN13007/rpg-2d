@@ -32,7 +32,8 @@ Validate one complete player journey before expanding the system set. Design dir
 - The project foundation is merged into `main`: Godot 4.7.2 .NET / C#, naming standards, tests and CI.
 - Issue [#6 — asset import and controllable player scene](https://github.com/TN13007/rpg-2d/issues/6) is closed as completed.
 - PR [#28 — typed item hierarchy](https://github.com/TN13007/rpg-2d/pull/28) is merged into `main`.
-- PR [#24 — Shop purchase flow](https://github.com/TN13007/rpg-2d/pull/24) remains open and unmerged. The project owner has confirmed the Shop gameplay works; merge remains the owner's decision.
+- PR [#24 — Shop purchase flow](https://github.com/TN13007/rpg-2d/pull/24) is merged. The Shop transaction flow is now part of `main`.
+- Issue [#30 — Shop UI redesign](https://github.com/TN13007/rpg-2d/issues/30) tracks the visual redesign and replacement of mode tabs with two explicit choices.
 
 ## Agent-owned delivery protocol
 
@@ -103,9 +104,9 @@ Do not request manual testing merely to repeat assertions already proven by reli
 
 ## Current handoff
 
-**Current delivery:** [PR #24 — Shop purchase flow](https://github.com/TN13007/rpg-2d/pull/24) remains open and unmerged. The project owner has confirmed the gameplay test succeeds. Review and merge are still owner-controlled.
+**Current delivery:** Issue [#30 — Shop UI redesign](https://github.com/TN13007/rpg-2d/issues/30) is being implemented on `feat/issue-30-shop-ui-redesign`. The Shop transaction flow from PR #24 is merged.
 
-**Next action:** the repository owner reviews the PR and decides whether to merge it. Do not merge automatically.
+**Next action:** finish the visual redesign, remove Tab mode switching, synchronize the Shop contract and validate the new PR. The repository owner retains merge authority.
 
 ## Learning evidence
 
