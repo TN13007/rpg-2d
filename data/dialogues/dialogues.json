@@ -23,12 +23,31 @@
         },
         {
           "id": "choice_4",
-          "text": "Mua hàng",
-          "action": "openShop"
+          "text": "Cửa hàng",
+          "nextDialogueId": "shop_menu"
         },
         { "id": "choice_5", "text": "Lựa chọn 5" },
         { "id": "choice_6", "text": "Lựa chọn 6" },
         { "id": "leave", "text": "Leave", "closesInteraction": true }
+      ]
+    },
+    {
+      "id": "shop_menu",
+      "title": "Cửa hàng",
+      "message": "Bạn muốn mua hay bán vật phẩm?",
+      "choices": [
+        {
+          "id": "shop_buy",
+          "text": "Mua hàng",
+          "action": "openShop",
+          "shopMode": "Buying"
+        },
+        {
+          "id": "shop_sell",
+          "text": "Bán vật phẩm",
+          "action": "openShop",
+          "shopMode": "Selling"
+        }
       ]
     },
     {
