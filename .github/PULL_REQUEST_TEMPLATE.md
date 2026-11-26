@@ -20,6 +20,12 @@ Issue link(s):
 ## Implementation notes
 Describe responsibilities, data flow, scene/resource changes and compatibility impact when relevant.
 
+## Documentation impact
+- [ ] Updated the existing canonical document(s) in this PR to match the implementation.
+- [ ] Reviewed documentation impact; no update is needed because this change does not alter durable player-facing, API, data, architecture, setup or workflow knowledge.
+
+Documents updated (or reason no update is needed):
+
 ## Tests and verification
 Record actual commands and observed results. Do not check an item unless it was run.
 - [ ] Python validator unit tests passed.
@@ -28,6 +34,7 @@ Record actual commands and observed results. Do not check an item unless it was 
 - [ ] Godot editor/import/build checks passed (when relevant).
 - [ ] Affected player journey was manually verified (when relevant).
 - [ ] Untested items and reasons are listed.
+- [ ] Documentation changes (if any) pass Markdown/link/anchor validation.
 
 Commands and results:
 
