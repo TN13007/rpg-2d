@@ -169,12 +169,14 @@ namespace RPG2D.Tests
 
             Assert.Equal(1, shopData.Items[0].Stock);
             Assert.Equal(1, shopData.SelectedQuantity);
+            Assert.Equal(4, shopData.Feedback.Quantity);
 
             shopData.ConfirmSelection();
 
             Assert.Equal(0, shopData.Items[0].Stock);
             Assert.Equal(5, playerData.GetItemQuantity("item_a"));
             Assert.Equal(500, playerData.Currency);
+            Assert.Equal(1, shopData.Feedback.Quantity);
         }
 
         [Fact]

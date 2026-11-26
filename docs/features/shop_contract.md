@@ -23,7 +23,9 @@ The `items` array defines goods the Shop sells to the player:
 | `price` | Player's purchase price per item |
 | `stock` | Current Shop stock for this runtime session |
 
-A purchase uses `PlayerData.TryPurchaseItem`. Shop stock decreases only after the player-side transaction succeeds. Failed purchases leave currency, Inventory and stock unchanged.
+A purchase uses `PlayerData.TryPurchaseItem`. Shop stock decreases only after the player-side transaction succeeds. Failed purchases leave currency, Inventory and stock unchanged. After a successful purchase, the selected quantity is clamped to the remaining stock so the player can continue buying the rest. When stock reaches zero, the UI shows `Hết hàng`.
+
+`ShopDatabase` rejects malformed catalogue entries and duplicate item IDs instead of silently removing them. A buyback entry with price `0` is allowed as a disabled/not-accepted item; negative prices are invalid.
 
 ## Selling from the player's Inventory
 

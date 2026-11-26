@@ -323,10 +323,11 @@ namespace RPG2D.Features.Shop
                 return;
             }
 
+            int purchasedQuantity = _selectedQuantity;
             if (!_playerData.TryPurchaseItem(
                 item,
                 shopItem.Price,
-                _selectedQuantity,
+                purchasedQuantity,
                 out string failureReason
             ))
             {
@@ -334,7 +335,7 @@ namespace RPG2D.Features.Shop
                 return;
             }
 
-            shopItem.Stock -= _selectedQuantity;
+            shopItem.Stock -= purchasedQuantity;
             if (shopItem.Stock > 0)
             {
                 _selectedQuantity = Math.Min(_selectedQuantity, shopItem.Stock);
@@ -343,7 +344,7 @@ namespace RPG2D.Features.Shop
             _feedback = new ShopFeedback(
                 ShopFeedbackKind.PurchaseSucceeded,
                 itemName: item.Name,
-                quantity: _selectedQuantity
+                quantity: purchasedQuantity
             );
         }
 
