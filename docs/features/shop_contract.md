@@ -10,7 +10,7 @@ This document defines the prototype Shop's purchase and sell behavior and its co
 - `ShopDatabase` loads the authored Shop definition from `res://data/shops/default_shop.json`.
 - `ShopInteractionUI` builds and renders Godot controls, formats Shop data into player-facing labels/details, and raises events for player intent. It does not perform purchase or sale transactions.
 - `PlayerData` remains the source of truth for owned item quantities and currency. `ShopData` delegates player-side changes to `PlayerData.TryPurchaseItem` and `PlayerData.TrySellItem`.
-- NPC dialogue content remains in `data/dialogues/dialogues.json`. The dialogue interaction flow handles the `openShop` action; Shop does not own NPC dialogue text.
+- NPC dialogue content remains in `data/dialogues/dialogues.json`. The dialogue interaction flow handles the `openShop` action; Shop does not own NPC dialogue text. Choosing Leave returns to the same dialogue node that opened the Shop, while Esc closes the entire interaction.
 - The current Shop has no VFX behavior. UI selection styling is part of `ShopInteractionUI`; future effects should remain separate from Shop rules and transactions.
 
 ## Purchase catalogue

@@ -237,7 +237,14 @@ namespace RPG2D.Features.Exploration
         private void ReturnToDialogueMenu()
         {
             _shopController.Close();
-            ShowDialogue("terminal_intro");
+
+            if (_currentDialogue == null)
+            {
+                CloseInteraction();
+                return;
+            }
+
+            ShowDialogue(_currentDialogue);
         }
 
         private void ShowDialogue(string dialogueId)
