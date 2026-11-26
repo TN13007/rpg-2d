@@ -8,6 +8,8 @@ namespace RPG2D.Features.Shop
     {
         public event Action<int>? ItemHovered;
         public event Action<int>? ItemConfirmed;
+        public event Action? BuyModeRequested;
+        public event Action? SellModeRequested;
         public event Action? CurrencyIncreaseRequested;
         public event Action? CurrencyDecreaseRequested;
         public bool IsShopVisible => _shopPanel != null && _shopPanel.Visible;
@@ -29,6 +31,10 @@ namespace RPG2D.Features.Shop
         private CanvasLayer _canvasLayer = null!;
         private PanelContainer _shopPanel = null!;
         private Label _shopTitleLabel = null!;
+        private Label _itemsHeadingLabel = null!;
+        private Label _controlsLabel = null!;
+        private Button _buyModeButton = null!;
+        private Button _sellModeButton = null!;
         private VBoxContainer _itemsContainer = null!;
         private ScrollContainer _itemsScrollContainer = null!;
         private Label _detailNameLabel = null!;
@@ -46,9 +52,20 @@ namespace RPG2D.Features.Shop
             BuildInterface();
         }
 
-        public void ShowShop(string title, IReadOnlyList<string> itemNames, int selectedIndex)
+        public void ShowShop(
+            string title,
+            string listHeading,
+            IReadOnlyList<string> itemNames,
+            int selectedIndex,
+            bool isBuying
+        )
         {
             _shopTitleLabel.Text = title;
+            _itemsHeadingLabel.Text = listHeading;
+            _buyModeButton.Disabled = isBuying;
+            _sellModeButton.Disabled = !isBuying;
+            _controlsLabel.Text =
+                "W / S — Chọn vật phẩm     A / D — Số lượng     Tab — Chuyển Mua / Bán     Space — Xác nhận / Rời cửa hàng     Esc — Đóng";
             SetItems(itemNames);
             _shopPanel.Visible = true;
             SetSelectedItem(selectedIndex);
@@ -120,6 +137,21 @@ namespace RPG2D.Features.Shop
             };
             content.AddChild(_shopTitleLabel);
 
+            HBoxContainer modeTabs = new()
+            {
+                Alignment = BoxContainer.AlignmentMode.Center
+            };
+            modeTabs.AddThemeConstantOverride("separation", 8);
+            content.AddChild(modeTabs);
+
+            _buyModeButton = new Button { Text = "Mua hàng" };
+            _buyModeButton.Pressed += () => BuyModeRequested?.Invoke();
+            modeTabs.AddChild(_buyModeButton);
+
+            _sellModeButton = new Button { Text = "Bán đồ" };
+            _sellModeButton.Pressed += () => SellModeRequested?.Invoke();
+            modeTabs.AddChild(_sellModeButton);
+
             HBoxContainer columns = new()
             {
                 SizeFlagsVertical = Control.SizeFlags.ExpandFill
@@ -139,12 +171,12 @@ namespace RPG2D.Features.Shop
             itemContent.AddThemeConstantOverride("separation", 6);
             itemPanel.AddChild(itemContent);
 
-            Label itemHeading = new()
+            _itemsHeadingLabel = new Label
             {
                 Text = "Hàng hóa",
                 HorizontalAlignment = HorizontalAlignment.Center
             };
-            itemContent.AddChild(itemHeading);
+            itemContent.AddChild(_itemsHeadingLabel);
 
             _itemsScrollContainer = new ScrollContainer
             {
@@ -228,13 +260,13 @@ namespace RPG2D.Features.Shop
             decreaseCurrencyButton.Pressed += () => CurrencyDecreaseRequested?.Invoke();
             debugCurrencyControls.AddChild(decreaseCurrencyButton);
 
-            Label controlsLabel = new()
+            _controlsLabel = new Label
             {
-                Text = "W / S — Chọn hàng     A — Giảm số lượng     D — Tăng số lượng     Space — Mua / Leave     Esc — Đóng",
+                Text = string.Empty,
                 HorizontalAlignment = HorizontalAlignment.Right,
                 AutowrapMode = TextServer.AutowrapMode.WordSmart
             };
-            content.AddChild(controlsLabel);
+            content.AddChild(_controlsLabel);
         }
 
         private static Label CreateDetailLabel()

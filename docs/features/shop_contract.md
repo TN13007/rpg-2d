@@ -1,0 +1,90 @@
+# Shop Contract
+
+This document defines the prototype Shop's purchase and sell behavior.
+
+## Runtime ownership
+
+- `PlayerInteractionController` creates one shared `ItemDatabase` and one shared `PlayerData` instance.
+- `ShopInteractionController` receives those instances. It must not load another player profile or edit Inventory stacks directly.
+- `PlayerData` remains the source of truth for owned item quantities and currency.
+- Shop catalog and buyback prices are loaded from `res://data/shops/default_shop.json`.
+
+## Purchase catalogue
+
+The `items` array defines goods the Shop sells to the player:
+
+| Field | Meaning |
+|---|---|
+| `itemId` | Existing ID from `data/items/items.json` |
+| `price` | Player's purchase price per item |
+| `stock` | Current shop stock for this runtime session |
+
+A purchase uses `PlayerData.TryPurchaseItem`. Shop stock decreases only after the player-side transaction succeeds. Failed purchases leave currency, Inventory and stock unchanged.
+
+## Selling from the player's Inventory
+
+The sell list is not loaded from the Shop's buy catalogue. It is generated from `PlayerData.Inventory` every time the player opens or switches to the sell tab.
+
+- Each distinct `ItemId` appears once, with quantities from all of its Inventory stacks combined.
+- The displayed quantity is the amount currently owned, not Shop stock.
+- The selected sale quantity must be between 1 and the owned quantity.
+- The Shop's `buybackPrices` array defines which item IDs it accepts and the amount it pays per item.
+- An owned item without a configured buyback price remains visible as not accepted; confirmation does not change player data.
+- After a successful sale, the sell list is rebuilt from the updated Inventory, so fully sold items disappear and remaining quantities refresh.
+
+Example buyback policy:
+
+```json
+"buybackPrices": [
+  { "itemId": "item_a", "price": 50 },
+  { "itemId": "health_potion", "price": 40 },
+  { "itemId": "iron_sword", "price": 150 }
+]
+```
+
+The prototype uses fixed prices. It does not calculate sell prices automatically from purchase prices.
+
+## Sale transaction
+
+`PlayerData.TrySellItem(itemId, unitPrice, quantity, out failureReason)` owns the player-side sale transaction:
+
+1. Validate item ID, positive unit price and positive quantity.
+2. Verify that the player owns the requested quantity.
+3. Calculate revenue using a wide integer and reject values outside the supported currency range.
+4. Verify that crediting the revenue will not overflow the currency balance.
+5. Remove the requested quantity through `TryRemoveItem`.
+6. Credit the currency only after the removal succeeds.
+
+Every rejected sale leaves both Inventory and currency unchanged. Removing the final quantity removes the corresponding stack. If the item exists in multiple stacks, removal spans those stacks.
+
+## Controls
+
+| Input | Action |
+|---|---|
+| W / S | Select a catalogue or owned Inventory item |
+| A / D | Decrease / increase transaction quantity |
+| Tab or the on-screen tabs | Switch between buying and selling |
+| Space | Confirm purchase/sale or leave the Shop |
+| Esc | Close the interaction and restore player control |
+
+The currency adjustment buttons are prototype test controls and are not part of the intended finished economy.
+
+## Current test fixtures
+
+- Starting currency: 1,000 vàng.
+- Starting Inventory: 1 × Đồ A, 2 × Bình máu, 1 × Kiếm sắt, 1 × Chìa khóa cổ.
+- Shop buys from the player: Đồ A (50), Đồ B (125), Bình máu (40), Kiếm sắt (150).
+- Chìa khóa cổ is intentionally not accepted, allowing the UI's unavailable-item behavior to be tested.
+- Shop sells Đồ A for 100 (stock 20) and Đồ B for 250 (stock 10).
+
+## Verification scenarios
+
+- Buy an item and confirm currency, Inventory and Shop stock update once.
+- Sell one unit from a stack and confirm only that quantity is removed.
+- Sell the remaining quantity and confirm the item disappears from the sell list.
+- Sell an item represented by multiple Inventory stacks and confirm removal spans stacks.
+- Attempt to sell more than owned, an unaccepted item or an invalid quantity; confirm no player data changes.
+- Attempt a sale that would overflow the currency balance; confirm Inventory and currency remain unchanged.
+- Switch between tabs, leave the Shop and close the interaction; confirm existing dialogue and player control remain functional.
+
+Runtime changes are in memory. Save/load persistence, dynamic prices, restocking and a general player Inventory screen are outside this prototype contract.

@@ -233,6 +233,50 @@ namespace RPG2D.Features.PlayerData
             return true;
         }
 
+        public bool TrySellItem(
+            string itemId,
+            int unitPrice,
+            int quantity,
+            out string failureReason
+        )
+        {
+            failureReason = string.Empty;
+            if (string.IsNullOrWhiteSpace(itemId) || unitPrice <= 0 || quantity <= 0)
+            {
+                failureReason = "Thông tin giao dịch không hợp lệ.";
+                return false;
+            }
+
+            if (!HasItem(itemId, quantity))
+            {
+                failureReason = "Bạn không có đủ vật phẩm.";
+                return false;
+            }
+
+            long totalRevenue = (long)unitPrice * quantity;
+            if (totalRevenue > int.MaxValue)
+            {
+                failureReason = "Tổng giá trị giao dịch vượt giới hạn.";
+                return false;
+            }
+
+            long nextBalance = (long)Currency + totalRevenue;
+            if (nextBalance > int.MaxValue)
+            {
+                failureReason = "Số vàng nhận được vượt giới hạn.";
+                return false;
+            }
+
+            if (!TryRemoveItem(itemId, quantity))
+            {
+                failureReason = "Không thể trừ vật phẩm khỏi Inventory.";
+                return false;
+            }
+
+            Currency = (int)nextBalance;
+            return true;
+        }
+
         private static bool AreCompatibleDefinitions(Item first, Item second)
         {
             if (first.GetType() != second.GetType() ||

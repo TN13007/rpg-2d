@@ -15,6 +15,7 @@ This document describes how gameplay features share player currency and Inventor
 - `TryAddCurrency(amount)`: adds a positive amount if the balance will not overflow.
 - `TrySpendCurrency(amount, allowDebt = false)`: spends a positive amount. Debt is denied by default and must be explicitly allowed by the caller.
 - `TryPurchaseItem(item, unitPrice, quantity, out failureReason)`: validates funds and item addition, adds through `TryAddItem`, then deducts currency. If validation or item addition fails, neither currency nor Inventory changes.
+- `TrySellItem(itemId, unitPrice, quantity, out failureReason)`: validates owned quantity and currency overflow, removes through `TryRemoveItem`, then credits the sale proceeds. If validation or removal fails, neither currency nor Inventory changes.
 
 Currency is not an Inventory item. Shop purchases do not allow debt. The Shop debug controls can add or spend 1,000 vàng per click; spending is rejected when the balance is insufficient.
 
@@ -26,6 +27,6 @@ Currency is not an Inventory item. Shop purchases do not allow debt. The Shop de
 
 ## Feature boundaries
 
-Shop owns shop stock, price and purchase UI. It delegates the player-side transaction to `PlayerData.TryPurchaseItem`, and decreases stock only after that method succeeds.
+Shop owns purchase stock, buyback prices and transaction UI. It delegates purchases to `PlayerData.TryPurchaseItem` and sales to `PlayerData.TrySellItem`. Purchase stock decreases only after a purchase succeeds. The sell list is built from the player's current Inventory stacks, grouped by item ID; items without a configured buyback price remain visible but cannot be sold.
 
 Gift and future item-reward features should use `TryRemoveItem` and `TryAddItem` rather than editing the Inventory collection.

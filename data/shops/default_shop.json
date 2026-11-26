@@ -12,5 +12,23 @@
       "price": 250,
       "stock": 10
     }
+  ],
+  "buybackPrices": [
+    {
+      "itemId": "item_a",
+      "price": 50
+    },
+    {
+      "itemId": "item_b",
+      "price": 125
+    },
+    {
+      "itemId": "health_potion",
+      "price": 40
+    },
+    {
+      "itemId": "iron_sword",
+      "price": 150
+    }
   ]
 }
