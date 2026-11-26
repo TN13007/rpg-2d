@@ -170,7 +170,15 @@ namespace RPG2D.Features.Exploration
 
             if (string.Equals(choice.Action, "openShop", StringComparison.OrdinalIgnoreCase))
             {
-                OpenShop();
+                if (!DialogueChoiceDefinition.IsSupportedShopMode(choice.ShopMode) ||
+                    !Enum.TryParse(choice.ShopMode, true, out ShopMode shopMode) ||
+                    !Enum.IsDefined(shopMode))
+                {
+                    _interactionUi.SetFeedback("Chế độ cửa hàng không hợp lệ.");
+                    return;
+                }
+
+                OpenShop(shopMode);
                 return;
             }
 
@@ -223,9 +231,9 @@ namespace RPG2D.Features.Exploration
             _playerController.SetPhysicsProcess(false);
         }
 
-        private void OpenShop()
+        private void OpenShop(ShopMode mode)
         {
-            if (!_shopController.Open())
+            if (!_shopController.Open(mode))
             {
                 _interactionUi.SetFeedback("Không thể mở cửa hàng.");
                 return;
