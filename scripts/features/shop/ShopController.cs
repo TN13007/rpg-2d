@@ -22,8 +22,6 @@ namespace RPG2D.Features.Shop
             AddChild(_shopUi);
             _shopUi.ItemHovered += SelectItem;
             _shopUi.ItemConfirmed += ConfirmItem;
-            _shopUi.BuyModeRequested += () => SetMode(ShopMode.Buying);
-            _shopUi.SellModeRequested += () => SetMode(ShopMode.Selling);
             _shopUi.CurrencyIncreaseRequested += () => AdjustCurrency(true);
             _shopUi.CurrencyDecreaseRequested += () => AdjustCurrency(false);
         }
@@ -34,7 +32,7 @@ namespace RPG2D.Features.Shop
             _itemDatabase = itemDatabase;
         }
 
-        public bool Open()
+        public bool Open(ShopMode mode)
         {
             if (_playerData == null || _itemDatabase == null)
             {
@@ -49,7 +47,7 @@ namespace RPG2D.Features.Shop
                 return false;
             }
 
-            _shopData = new ShopData(shop, _playerData, _itemDatabase);
+            _shopData = new ShopData(shop, _playerData, _itemDatabase, mode);
             RefreshUI();
             return true;
         }
@@ -99,17 +97,6 @@ namespace RPG2D.Features.Shop
             {
                 ConfirmSelection();
             }
-        }
-
-        private void SetMode(ShopMode mode)
-        {
-            if (_shopData == null)
-            {
-                return;
-            }
-
-            _shopData.SetMode(mode);
-            RefreshUI();
         }
 
         private void SelectItem(int index)

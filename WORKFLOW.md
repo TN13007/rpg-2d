@@ -33,7 +33,7 @@ Validate one complete player journey before expanding the system set. Design dir
 - Issue [#6 — asset import and controllable player scene](https://github.com/TN13007/rpg-2d/issues/6) is closed as completed.
 - PR [#28 — typed item hierarchy](https://github.com/TN13007/rpg-2d/pull/28) is merged into `main`.
 - PR [#24 — Shop purchase flow](https://github.com/TN13007/rpg-2d/pull/24) is merged. The Shop transaction flow is now part of `main`.
-- Issue [#30 — Shop UI redesign](https://github.com/TN13007/rpg-2d/issues/30) tracks the visual redesign and replacement of mode tabs with two explicit choices.
+- PR [#30 — Shop UI redesign](https://github.com/TN13007/rpg-2d/pull/30) is merged. The Shop transaction screen has a clearer visual hierarchy; its mode selector is being moved into Dialogue by Issue [#31 — Shop dialogue modes](https://github.com/TN13007/rpg-2d/issues/31).
 
 ## Agent-owned delivery protocol
 
@@ -104,9 +104,9 @@ Do not request manual testing merely to repeat assertions already proven by reli
 
 ## Current handoff
 
-**Current delivery:** Issue [#30 — Shop UI redesign](https://github.com/TN13007/rpg-2d/issues/30) is being implemented on `feat/issue-30-shop-ui-redesign`. The Shop transaction flow from PR #24 is merged.
+**Current delivery:** Issue [#31 — Shop dialogue modes](https://github.com/TN13007/rpg-2d/issues/31) is being implemented on `feat/issue-31-shop-dialogue-modes`. PR #30 and the Shop transaction flow are merged.
 
-**Next action:** finish the visual redesign, remove Tab mode switching, synchronize the Shop contract and validate the new PR. The repository owner retains merge authority.
+**Next action:** route the Buy/Sell choice through the shared Dialogue graph, keep Shop UI mode-specific, synchronize the dialogue modding and Shop contracts, and validate the new PR. The repository owner retains merge authority.
 
 ## Learning evidence
 

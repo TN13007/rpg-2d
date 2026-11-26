@@ -138,6 +138,15 @@ namespace RPG2D.Features.Interaction.Data
                     );
                     return false;
                 }
+
+                if (string.Equals(choice.Action, "openShop", StringComparison.OrdinalIgnoreCase) &&
+                    !DialogueChoiceDefinition.IsSupportedShopMode(choice.ShopMode))
+                {
+                    GD.PushWarning(
+                        $"Skipping dialogue '{dialogue.Id}' in '{path}': openShop choices need shopMode Buying or Selling."
+                    );
+                    return false;
+                }
             }
 
             return true;

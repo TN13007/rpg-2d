@@ -10,8 +10,10 @@ This document defines the prototype Shop's purchase and sell behavior and its co
 - `ShopDatabase` loads the authored Shop definition from `res://data/shops/default_shop.json`.
 - `ShopInteractionUI` builds and renders Godot controls, formats Shop data into player-facing labels/details, and raises events for player intent. It does not perform purchase or sale transactions.
 - `PlayerData` remains the source of truth for owned item quantities and currency. `ShopData` delegates player-side changes to `PlayerData.TryPurchaseItem` and `PlayerData.TrySellItem`.
-- NPC dialogue content remains in `data/dialogues/dialogues.json`. The dialogue interaction flow handles the `openShop` action; Shop does not own NPC dialogue text. Choosing Leave returns to the same dialogue node that opened the Shop, while Esc closes the entire interaction.
-- The current Shop has no VFX behavior. UI selection styling and the two explicit Buy/Sell mode choices are part of `ShopInteractionUI`; future effects should remain separate from Shop rules and transactions.
+- NPC dialogue content remains in `data/dialogues/dialogues.json`. Choosing **Cửa hàng** navigates to a dedicated dialogue node with **Mua hàng** and **Bán vật phẩm** choices. Each choice invokes the `openShop` action with a required `shopMode` value (`Buying` or `Selling`).
+- `PlayerInteractionController` validates the dialogue action mode and passes it to `ShopController.Open(mode)`. `ShopData` receives an immutable mode when created; the Shop UI does not switch modes.
+- Leaving the Shop returns to the dialogue node that launched that mode (the Shop menu), allowing the player to choose the other action. Esc closes the entire interaction.
+- The current Shop has no VFX behavior. Item selection styling remains in `ShopInteractionUI`; mode selection belongs to Dialogue.
 
 ## Purchase catalogue
 
@@ -69,7 +71,6 @@ Every rejected sale leaves both Inventory and currency unchanged. Removing the f
 |---|---|
 | W / S | Select a catalogue or owned Inventory item |
 | A / D | Decrease / increase transaction quantity |
-| Click Mua hàng / Bán vật phẩm | Switch between buying and selling |
 | Space | Confirm purchase/sale or leave the Shop |
 | Esc | Close the interaction and restore player control |
 
@@ -91,6 +92,8 @@ The currency adjustment buttons are prototype test controls and are not part of 
 - Sell an item represented by multiple Inventory stacks and confirm removal spans stacks.
 - Attempt to sell more than owned, an unaccepted item or an invalid quantity; confirm no player data changes.
 - Attempt a sale that would overflow the currency balance; confirm Inventory and currency remain unchanged.
-- Switch between the Mua hàng and Bán vật phẩm choices, leave the Shop and close the interaction; confirm existing dialogue and player control remain functional.
+- From the NPC menu, choose Cửa hàng, then Mua hàng; leave and verify the Shop menu reappears.
+- Choose Bán vật phẩm from the Shop menu; leave and verify the same menu reappears.
+- Press Esc from the Shop menu and from either Shop mode; confirm the interaction closes and player control returns.
 
 Runtime changes are in memory. Save/load persistence, dynamic prices, restocking and a general player Inventory screen are outside this prototype contract.
