@@ -1,7 +1,7 @@
 [gd_scene load_steps=5 format=3]
 
 [ext_resource type="Texture2D" path="res://assets/environment/interactables/terminal/terminal.png" id="1_texture"]
-[ext_resource type="Script" path="res://scripts/features/interaction/TerminalController.cs" id="2_controller"]
+[ext_resource type="Script" path="res://scripts/features/interaction/DialogueInteractableController.cs" id="2_controller"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_solid"]
 size = Vector2(24, 6)
@@ -12,6 +12,7 @@ size = Vector2(48, 36)
 [node name="Terminal" type="Node2D"]
 y_sort_origin = 12
 script = ExtResource("2_controller")
+DialogueId = "terminal_intro"
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
 texture = ExtResource("1_texture")

@@ -3,10 +3,10 @@ using RPG2D.Features.Exploration;
 
 namespace RPG2D.Features.Interaction
 {
-    public partial class TerminalController : Node2D
+    public partial class DialogueInteractableController : Node2D
     {
         [Export]
-        public string DialogueId { get; set; } = "terminal_intro";
+        public string DialogueId { get; set; } = string.Empty;
 
         private Area2D _interactionArea = null!;
 
@@ -22,7 +22,7 @@ namespace RPG2D.Features.Interaction
             PlayerInteractionController controller =
                 body.GetNodeOrNull<PlayerInteractionController>("PlayerInteractionController");
 
-            controller?.SetCurrentTerminal(this);
+            controller?.SetCurrentInteractable(this);
         }
 
         private void OnBodyExited(Node2D body)
@@ -30,7 +30,7 @@ namespace RPG2D.Features.Interaction
             PlayerInteractionController controller =
                 body.GetNodeOrNull<PlayerInteractionController>("PlayerInteractionController");
 
-            controller?.ClearCurrentTerminal(this);
+            controller?.ClearCurrentInteractable(this);
         }
     }
 }

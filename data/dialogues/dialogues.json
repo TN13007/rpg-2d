@@ -51,6 +51,30 @@
       ]
     },
     {
+      "id": "villager_intro",
+      "title": "Người dân",
+      "message": "Chào bạn. Bạn mới đến khu vực này à? Dạo gần đây quanh đây có vài chuyện khá lạ.",
+      "choices": [
+        {
+          "id": "ask_about_area",
+          "text": "Có chuyện gì đã xảy ra?",
+          "nextDialogueId": "villager_rumor"
+        },
+        {
+          "id": "say_goodbye",
+          "text": "Tôi đi đây.",
+          "closesInteraction": true
+        }
+      ]
+    },
+    {
+      "id": "villager_rumor",
+      "title": "Người dân",
+      "message": "Tôi nghe nói có người nhìn thấy ánh sáng kỳ lạ ở phía rìa khu vực. Nhưng tôi chưa dám đến kiểm tra.",
+      "choices": [],
+      "nextDialogueId": "villager_intro"
+    },
+    {
       "id": "choice_1_step_1",
       "title": "Lựa chọn 1",
       "message": "Nhấn Space để tiếp tục.",

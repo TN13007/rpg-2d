@@ -12,7 +12,7 @@ namespace RPG2D.Features.Exploration
     public partial class PlayerInteractionController : Node
     {
         private PlayerController _playerController = null!;
-        private TerminalController? _currentTerminal;
+        private DialogueInteractableController? _currentInteractable;
         private TerminalInteractionUI _interactionUi = null!;
         private DialogueDatabase _dialogueDatabase = null!;
         private PlayerDataState _playerData = null!;
@@ -51,15 +51,15 @@ namespace RPG2D.Features.Exploration
                 return;
             }
 
-            if (_currentTerminal != null && Input.IsActionJustPressed("interact"))
+            if (_currentInteractable != null && Input.IsActionJustPressed("interact"))
             {
                 OpenInteraction();
             }
         }
 
-        public void SetCurrentTerminal(TerminalController terminal)
+        public void SetCurrentInteractable(DialogueInteractableController interactable)
         {
-            _currentTerminal = terminal;
+            _currentInteractable = interactable;
 
             if (!_isInteractionOpen)
             {
@@ -67,14 +67,14 @@ namespace RPG2D.Features.Exploration
             }
         }
 
-        public void ClearCurrentTerminal(TerminalController terminal)
+        public void ClearCurrentInteractable(DialogueInteractableController interactable)
         {
-            if (_currentTerminal != terminal)
+            if (_currentInteractable != interactable)
             {
                 return;
             }
 
-            _currentTerminal = null;
+            _currentInteractable = null;
 
             if (!_isInteractionOpen)
             {
@@ -210,17 +210,17 @@ namespace RPG2D.Features.Exploration
 
         private void OpenInteraction()
         {
-            if (_currentTerminal == null)
+            if (_currentInteractable == null)
             {
                 return;
             }
 
             if (!_dialogueDatabase.TryGetDialogue(
-                _currentTerminal.DialogueId,
+                _currentInteractable.DialogueId,
                 out DialogueDefinition dialogue))
             {
                 GD.PushWarning(
-                    $"Terminal '{_currentTerminal.Name}' references missing dialogue ID '{_currentTerminal.DialogueId}'."
+                    $"Interactable '{_currentInteractable.Name}' references missing dialogue ID '{_currentInteractable.DialogueId}'."
                 );
                 return;
             }
@@ -294,7 +294,7 @@ namespace RPG2D.Features.Exploration
             _shopController.Close();
             _interactionUi.HideInteraction();
             _playerController.SetPhysicsProcess(true);
-            _interactionUi.SetPromptVisible(_currentTerminal != null);
+            _interactionUi.SetPromptVisible(_currentInteractable != null);
         }
     }
 }

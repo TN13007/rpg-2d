@@ -32,8 +32,9 @@ Validate one complete player journey before expanding the system set. Design dir
 - The project foundation is merged into `main`: Godot 4.7.2 .NET / C#, naming standards, tests and CI.
 - Issue [#6 — asset import and controllable player scene](https://github.com/TN13007/rpg-2d/issues/6) is closed as completed.
 - PR [#28 — typed item hierarchy](https://github.com/TN13007/rpg-2d/pull/28) is merged into `main`.
-- PR [#24 — Shop purchase flow](https://github.com/TN13007/rpg-2d/pull/24) is merged. The Shop transaction flow is now part of `main`.
-- PR [#30 — Shop UI redesign](https://github.com/TN13007/rpg-2d/pull/30) is merged. The Shop transaction screen has a clearer visual hierarchy; its mode selector is being moved into Dialogue by Issue [#31 — Shop dialogue modes](https://github.com/TN13007/rpg-2d/issues/31).
+- PR [#24 — Shop purchase flow](https://github.com/TN13007/rpg-2d/pull/24) is merged. The Shop transaction flow is part of `main`.
+- PR [#30 — Shop UI redesign](https://github.com/TN13007/rpg-2d/pull/30) and PR [#31 — dialogue-driven Shop modes](https://github.com/TN13007/rpg-2d/pull/31) are merged. Shop Buy/Sell mode selection now belongs to the shared Dialogue graph.
+- The first NPC is being added by Issue [#18](https://github.com/TN13007/rpg-2d/issues/18); the shared interaction controller is being generalized from the Terminal implementation.
 
 ## Agent-owned delivery protocol
 
@@ -45,7 +46,7 @@ Validate one complete player journey before expanding the system set. Design dir
 4. **Implement:** work on the task branch, keep changes focused, preserve existing project conventions and complete the player-facing slice where practical. Update tests, fixtures and data alongside implementation. Perform a documentation-impact review for every task; update affected canonical documents in this same task branch and PR rather than leaving documentation as a follow-up chore. Do not stop after writing code or after the first successful test.
 5. **Verify and repair:** run the repository validator and all focused tests/build/runtime checks required by the change. When a check fails, inspect its output, trace the cause, fix it and rerun the affected checks. Repeat until successful. Do not ask the user to diagnose technical failures that can be investigated from code, tests, logs or repository state.
 6. **Review and push:** inspect the complete diff against the target base; check acceptance criteria, regressions, scope creep, data/scene references and documentation consistency. Commit coherent changes and push the task branch. Open or update a PR so the repository's PR-triggered CI can run.
-7. **CI hard gate:** verify every required check and every applicable CI job has completed successfully on the exact latest PR head commit. A green result on an older commit is not sufficient. If CI fails, inspect the failing job/log, fix code or configuration issues, push and repeat verification. Retry transient infrastructure failures where appropriate. Never report implementation-ready status or ask for user playtesting before this gate passes. If CI cannot run because of an external service, missing permission or repository configuration, report the specific blocker and do not claim success.
+7. **CI hard gate:** verify every required check and every applicable CI job has completed successfully on the exact latest PR head commit. A green result on an older commit is not sufficient. If CI fails, inspect the failing job/log, fix code or configuration issues, push and repeat verification. Never report implementation-ready status or ask for user playtesting before this gate passes. If CI cannot run because of an external service, missing permission or repository configuration, report the specific blocker and do not claim success.
 8. **User validation:** request manual playtesting only for behavior that cannot be reliably established through automated checks or available runtime inspection, such as game feel, timing, visual readability or an input/scene interaction that requires hands-on play. First complete the technical checks and CI gate. Give the user a short, specific test target and identify the exact PR commit being tested. If the user reports a defect, resume the verify-and-repair loop, push the fix and pass CI again before the next handoff. If the change is adequately covered by automation, do not request a redundant manual test.
 9. **Deliver:** update the PR with the actual implementation, decisions, test evidence, limitations and any remaining user-validation result. Update this handoff only when the current project state or next action changes. Report the result only after the applicable completion gates are satisfied. Do not merge unless the repository owner explicitly authorizes it.
 
@@ -104,9 +105,9 @@ Do not request manual testing merely to repeat assertions already proven by reli
 
 ## Current handoff
 
-**Current delivery:** Issue [#31 — Shop dialogue modes](https://github.com/TN13007/rpg-2d/issues/31) is being implemented on `feat/issue-31-shop-dialogue-modes`. PR #30 and the Shop transaction flow are merged.
+**Current delivery:** Issue [#18 — first reusable NPC](https://github.com/TN13007/rpg-2d/issues/18) is being implemented on `feat/issue-18-first-npc`. PR #31 is merged; Shop and its dialogue-selected Buy/Sell modes are part of `main`.
 
-**Next action:** route the Buy/Sell choice through the shared Dialogue graph, keep Shop UI mode-specific, synchronize the dialogue modding and Shop contracts, and validate the new PR. The repository owner retains merge authority.
+**Next action:** finish the shared dialogue-interactable controller, add one Villager NPC with its own dialogue, verify the NPC and Terminal scenes together, and prepare a CI-verified PR. The repository owner retains merge authority.
 
 ## Learning evidence
 
