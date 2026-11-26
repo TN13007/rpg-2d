@@ -94,7 +94,8 @@ namespace RPG2D.Tests
             Assert.True(playerData.TryAddItem(potion, 3));
 
             ShopData shopData = new(CreateShop(), playerData, itemDatabase, ShopMode.Selling);
-            
+            Assert.Equal(ShopMode.Selling, shopData.Mode);
+
 
             Assert.Single(shopData.Items);
             Assert.Equal("health_potion", shopData.Items[0].ItemId);
