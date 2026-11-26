@@ -8,8 +8,6 @@ namespace RPG2D.Features.Shop
     {
         public event Action<int>? ItemHovered;
         public event Action<int>? ItemConfirmed;
-        public event Action? BuyModeRequested;
-        public event Action? SellModeRequested;
         public event Action? CurrencyIncreaseRequested;
         public event Action? CurrencyDecreaseRequested;
         public bool IsShopVisible => _shopPanel != null && _shopPanel.Visible;
@@ -33,8 +31,6 @@ namespace RPG2D.Features.Shop
         private Label _shopTitleLabel = null!;
         private Label _itemsHeadingLabel = null!;
         private Label _controlsLabel = null!;
-        private Button _buyModeButton = null!;
-        private Button _sellModeButton = null!;
         private VBoxContainer _itemsContainer = null!;
         private ScrollContainer _itemsScrollContainer = null!;
         private Label _detailNameLabel = null!;
@@ -55,11 +51,12 @@ namespace RPG2D.Features.Shop
         public void ShowShop(ShopData shopData)
         {
             IReadOnlyList<ShopItemOption> items = shopData.Items;
-            _shopTitleLabel.Text = shopData.ShopName;
+            _shopTitleLabel.Text = shopData.Mode == ShopMode.Buying
+                ? $"{shopData.ShopName} — Mua hàng"
+                : $"{shopData.ShopName} — Bán vật phẩm";
             _itemsHeadingLabel.Text = shopData.Mode == ShopMode.Buying
                 ? "Hàng hóa"
                 : "Vật phẩm đang sở hữu";
-            UpdateModeSelection(shopData.Mode);
             _controlsLabel.Text =
                 "W / S — Chọn vật phẩm     A / D — Số lượng     Space — Xác nhận / Rời cửa hàng     Esc — Đóng";
             SetItems(BuildItemNames(shopData.Mode, items));
@@ -321,25 +318,6 @@ namespace RPG2D.Features.Shop
             _currencyLabel.AddThemeColorOverride("font_color", new Color(1.0f, 0.78f, 0.34f));
             header.AddChild(_currencyLabel);
 
-            HBoxContainer modeChoices = new()
-            {
-                SizeFlagsHorizontal = Control.SizeFlags.ExpandFill
-            };
-            modeChoices.AddThemeConstantOverride("separation", 12);
-            content.AddChild(modeChoices);
-
-            _buyModeButton = CreateModeButton(
-                "MUA HÀNG\nChọn vật phẩm từ cửa hàng"
-            );
-            _buyModeButton.Pressed += () => BuyModeRequested?.Invoke();
-            modeChoices.AddChild(_buyModeButton);
-
-            _sellModeButton = CreateModeButton(
-                "BÁN VẬT PHẨM\nThanh lý đồ trong túi"
-            );
-            _sellModeButton.Pressed += () => SellModeRequested?.Invoke();
-            modeChoices.AddChild(_sellModeButton);
-
             HBoxContainer columns = new()
             {
                 SizeFlagsVertical = Control.SizeFlags.ExpandFill
@@ -486,46 +464,6 @@ namespace RPG2D.Features.Shop
             _controlsLabel.AddThemeFontSizeOverride("font_size", 13);
             _controlsLabel.AddThemeColorOverride("font_color", new Color(0.65f, 0.67f, 0.71f));
             content.AddChild(_controlsLabel);
-        }
-
-        private static Button CreateModeButton(string text)
-        {
-            Button button = new()
-            {
-                Text = text,
-                ToggleMode = true,
-                CustomMinimumSize = new Vector2(0, 78),
-                SizeFlagsHorizontal = Control.SizeFlags.ExpandFill,
-                Alignment = HorizontalAlignment.Left
-            };
-            button.AddThemeFontSizeOverride("font_size", 16);
-            button.AddThemeColorOverride("font_color", new Color(0.83f, 0.84f, 0.86f));
-            button.AddThemeColorOverride("font_hover_color", Colors.White);
-            button.AddThemeColorOverride("font_pressed_color", new Color(1.0f, 0.91f, 0.70f));
-            button.AddThemeStyleboxOverride(
-                "normal",
-                CreatePanelStyle(new Color(0.11f, 0.12f, 0.15f), new Color(0.32f, 0.33f, 0.36f), 1, 8, 14)
-            );
-            button.AddThemeStyleboxOverride(
-                "hover",
-                CreatePanelStyle(new Color(0.16f, 0.15f, 0.13f), new Color(0.67f, 0.49f, 0.24f), 2, 8, 14)
-            );
-            button.AddThemeStyleboxOverride(
-                "pressed",
-                CreatePanelStyle(new Color(0.25f, 0.19f, 0.11f), new Color(1.0f, 0.72f, 0.27f), 2, 8, 14)
-            );
-            button.AddThemeStyleboxOverride(
-                "hover_pressed",
-                CreatePanelStyle(new Color(0.29f, 0.22f, 0.12f), new Color(1.0f, 0.82f, 0.42f), 2, 8, 14)
-            );
-            return button;
-        }
-
-        private void UpdateModeSelection(ShopMode mode)
-        {
-            bool buying = mode == ShopMode.Buying;
-            _buyModeButton.SetPressedNoSignal(buying);
-            _sellModeButton.SetPressedNoSignal(!buying);
         }
 
         private static StyleBoxFlat CreatePanelStyle(
