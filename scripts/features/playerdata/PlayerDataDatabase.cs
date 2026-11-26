@@ -29,7 +29,6 @@ namespace RPG2D.Features.PlayerData
 
         public static PlayerData Load(ItemDatabase itemDatabase)
         {
-            PlayerData playerData = new();
             Godot.FileAccess? file = Godot.FileAccess.Open(
                 PlayerDataPath,
                 Godot.FileAccess.ModeFlags.Read
@@ -38,7 +37,7 @@ namespace RPG2D.Features.PlayerData
             if (file == null)
             {
                 GD.PushWarning("Could not read player data '" + PlayerDataPath + "'.");
-                return playerData;
+                return new PlayerData();
             }
 
             string json = file.GetAsText();
@@ -64,6 +63,8 @@ namespace RPG2D.Features.PlayerData
                         GD.PushWarning("Skipping invalid inventory stack in '" + PlayerDataPath + "'.");
                     }
                 }
+
+                return playerData;
             }
             catch (JsonException exception)
             {
@@ -71,7 +72,6 @@ namespace RPG2D.Features.PlayerData
                 return new PlayerData();
             }
 
-            return playerData;
         }
     }
 }
