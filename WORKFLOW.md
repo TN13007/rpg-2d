@@ -41,7 +41,7 @@ Validate one complete player journey before expanding the system set. Design dir
 1. **Inspect:** read the active Issue and acceptance criteria; inspect the latest `main`, related open/merged PRs, working branch and Git state, relevant documentation, implementation, data and tests. Treat unmerged PRs as proposals. Never assume the local or remote branch is current without checking.
 2. **Resolve decisions:** distinguish missing product decisions from questions answerable through repository inspection, tests or logs. Make a conservative, reversible choice when requirements and existing conventions are sufficient. Ask the user only for decisions that materially change the intended experience, information unavailable to the agent, or experiential feedback such as game feel. Ask one focused question and continue all independent work.
 3. **Plan:** define the intended outcome, scope, non-goals, affected responsibilities and verification. Create a temporary Implementation Brief for cross-feature work when it reduces ambiguity; do not create permanent duplicate planning documents.
-4. **Implement:** work on the task branch, keep changes focused, preserve existing project conventions and complete the player-facing slice where practical. Update tests, fixtures, data and documentation alongside implementation. Do not stop after writing code or after the first successful test.
+4. **Implement:** work on the task branch, keep changes focused, preserve existing project conventions and complete the player-facing slice where practical. Update tests, fixtures and data alongside implementation. Perform a documentation-impact review for every task; update affected canonical documents in this same task branch and PR rather than leaving documentation as a follow-up chore. Do not stop after writing code or after the first successful test.
 5. **Verify and repair:** run the repository validator and all focused tests/build/runtime checks required by the change. When a check fails, inspect its output, trace the cause, fix it and rerun the affected checks. Repeat until successful. Do not ask the user to diagnose technical failures that can be investigated from code, tests, logs or repository state.
 6. **Review and push:** inspect the complete diff against the target base; check acceptance criteria, regressions, scope creep, data/scene references and documentation consistency. Commit coherent changes and push the task branch. Open or update a PR so the repository's PR-triggered CI can run.
 7. **CI hard gate:** verify every required check and every applicable CI job has completed successfully on the exact latest PR head commit. A green result on an older commit is not sufficient. If CI fails, inspect the failing job/log, fix code or configuration issues, push and repeat verification. Retry transient infrastructure failures where appropriate. Never report implementation-ready status or ask for user playtesting before this gate passes. If CI cannot run because of an external service, missing permission or repository configuration, report the specific blocker and do not claim success.
@@ -53,7 +53,8 @@ Validate one complete player journey before expanding the system set. Design dir
 **Implementation-ready for owner review** means all of the following are true:
 
 - Issue acceptance criteria are satisfied, or any explicitly deferred item is documented and agreed.
-- Implementation, relevant tests, fixtures, data and documentation are updated.
+- Implementation, relevant tests, fixtures and data are updated.
+- Documentation impact has been reviewed for every task; all affected canonical documents are synchronized in the same PR, or the PR records why no update is needed.
 - Local validation and all applicable feature-specific checks pass.
 - The full diff has been reviewed and contains no known unintended changes.
 - All required CI checks and applicable CI jobs pass on the latest PR head commit.
@@ -72,6 +73,20 @@ Ask the user only when:
 - an external permission or service constraint prevents further progress.
 
 Before asking, inspect relevant code and data, search existing issues/PRs, read available logs and attempt the available reproduction methods. State what is already known, what cannot be established and the single decision or observation needed.
+
+### Documentation synchronization
+
+Documentation is part of delivery, not optional cleanup after implementation. For every task, inspect whether the change alters accepted player experience, rules, feature behavior, data/content formats, public APIs, architecture/responsibility boundaries, project structure, setup/build/test commands or contributor/agent workflow.
+
+When the change affects durable project knowledge:
+- Update the existing canonical document that owns the information (Design for intended player experience and rules; Architecture for technical responsibilities/contracts; feature documentation for feature behavior and data; README/setup docs for project usage; WORKFLOW for current status and next handoff; AGENTS/CONTRIBUTING for agent or collaboration rules).
+- Make the documentation change in the same task branch and PR as the implementation, so code and documentation are reviewed and merged together.
+- Describe the behavior and contract that actually exist, not plans or assumptions. Keep examples, paths, names, schemas and commands synchronized with the implementation.
+- Update links/references and remove obsolete instructions when a change supersedes them. Do not create a second document when an existing canonical home already exists.
+
+Every PR must record the documentation-impact decision. If no document needs changing, explicitly say that documentation was reviewed and no update is required, with a short reason (for example: internal refactor with no user-visible, API, data, architecture or workflow change). Do not create a changelog, session note or prose document for a trivial change merely to satisfy a checkbox.
+
+Documentation synchronization is complete only when affected documents match the implementation and their applicable Markdown/link/anchor validation passes. A missing required documentation update blocks implementation-ready status just like a failing test.
 
 ### Verification selection
 
