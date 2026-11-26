@@ -26,6 +26,18 @@ Each file must contain a manifest with `schemaVersion` set to `1` and a `dialogu
           "nextDialogueId": "terminal_status"
         },
         {
+          "id": "open_shop_buy",
+          "text": "Buy items",
+          "action": "openShop",
+          "shopMode": "Buying"
+        },
+        {
+          "id": "open_shop_sell",
+          "text": "Sell items",
+          "action": "openShop",
+          "shopMode": "Selling"
+        },
+        {
           "id": "leave",
           "text": "Leave",
           "closesInteraction": true
@@ -56,10 +68,12 @@ Each file must contain a manifest with `schemaVersion` set to `1` and a `dialogu
 | `nextDialogueId` | string | No | Dialogue shown when Space is pressed on a page with no choices. |
 | `choices[].id` | string | Yes | Unique choice identifier within its dialogue. |
 | `choices[].text` | string | Yes | Text shown for the choice. |
+| `choices[].action` | string | No | Supported action. `openShop` opens the Shop interface. |
+| `choices[].shopMode` | string | Required for `openShop` | Must be `Buying` or `Selling`; selects the Shop mode before its UI opens. |
 | `choices[].closesInteraction` | boolean | No | When true, selecting the choice closes the interaction. Defaults to false. |
 | `choices[].nextDialogueId` | string | No | Dialogue shown after selecting this choice. |
  
-A dialogue with no choices can use `nextDialogueId` to create a sequence of pages advanced with Space. A choice can use `nextDialogueId` to branch to another dialogue. A terminal page can point back to the menu dialogue to return to its choices.
+A dialogue with no choices can use `nextDialogueId` to create a sequence of pages advanced with Space. A choice can use `nextDialogueId` to branch to another dialogue. A terminal page can point back to the menu dialogue to return to its choices. An `openShop` choice must provide a valid `shopMode`; invalid Shop action modes cause the containing dialogue entry to be skipped during loading.
 
 ## Loading and overrides
 
@@ -67,7 +81,7 @@ Built-in dialogues load first. Mod files load afterward in alphabetical filename
 
 Different mod files that define the same ID are resolved by alphabetical filename order: the later file wins. Use unique IDs to avoid accidental conflicts.
 
-Invalid JSON files and invalid dialogue entries are skipped with a warning in the Godot output. The game does not execute code from JSON. Dialogue JSON controls display text, choice order, navigation links, and the close-interaction behavior only.
+Invalid JSON files and invalid dialogue entries are skipped with a warning in the Godot output. The game does not execute code from JSON. Dialogue JSON controls display text, choice order, navigation links, the close-interaction behavior, and the supported `openShop` action with its required mode.
 
 ## Example mod
 
