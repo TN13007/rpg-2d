@@ -25,7 +25,7 @@ If documentation and implementation disagree, report the mismatch and verify aga
 
 ## Implementation guardrails
 
-- Own the implementation end to end. Do not stop after writing code, after the first passing test or after opening a PR.
+- Own the implementation end to end, including documentation synchronization. Do not stop after writing code, after the first passing test or after opening a PR.
 - Design around a concrete player-facing scenario. Prefer a complete, testable player journey over disconnected systems.
 - Keep feature-specific behavior near the feature that owns the player-facing behavior.
 - Keep scene composition, gameplay rules, content data and UI responsibilities distinguishable.
@@ -35,6 +35,8 @@ If documentation and implementation disagree, report the mismatch and verify aga
 - Do not reorganize the third-party asset pack as unrelated cleanup. A dedicated import task may place vendor files under the appropriate `assets/<category>/ninja_adventure/` folders, but must preserve original asset bytes, upstream internal names and license/source information.
 - Avoid broad refactors and generated-file churn. Keep each PR focused on its Issue.
 - Do not add an abstraction until a real second use case or clear complexity reduction justifies it.
+- Perform a documentation-impact review for every task. When behavior, rules, data formats, APIs, architecture, project structure, setup or workflows change, update the existing canonical document in the same branch and PR. Do not defer required documentation to a later cleanup task.
+- If no documentation change is warranted, record in the PR why the change has no lasting user-facing, API, data, architecture or workflow impact. Do not create documentation churn for trivial internal changes.
 
 ## Agent-owned execution and user involvement
 
