@@ -27,7 +27,7 @@ A purchase uses `PlayerData.TryPurchaseItem`. Shop stock decreases only after th
 
 ## Selling from the player's Inventory
 
-The sell list is generated from `PlayerData.Inventory` whenever `ShopData` creates a view of the current Shop state.
+The sell list is generated from `PlayerData.Inventory` whenever `ShopData.Items` is read.
 
 - Each distinct `ItemId` appears once, with quantities from all of its Inventory stacks combined.
 - The displayed quantity is the amount currently owned, not Shop stock.
