@@ -112,7 +112,7 @@ namespace RPG2D.Tests
             Assert.True(playerData.TryAddItem(potion, 3));
 
             ShopData shopData = new(CreateShop(), playerData, itemDatabase, ShopMode.Selling);
-            
+
             shopData.ChangeQuantity(1);
             ShopDataOutcome outcome = shopData.ConfirmSelection();
 
@@ -132,7 +132,7 @@ namespace RPG2D.Tests
             Assert.True(playerData.TryAddItem(key, 1));
 
             ShopData shopData = new(CreateShop(), playerData, itemDatabase, ShopMode.Selling);
-            
+
             shopData.ConfirmSelection();
 
             Assert.Equal(25, playerData.Currency);
