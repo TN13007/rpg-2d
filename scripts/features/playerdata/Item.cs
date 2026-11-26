@@ -34,6 +34,7 @@ namespace RPG2D.Features.PlayerData
             return base.IsValid()
                 && !Stackable
                 && MaxStackSize == 1
+                && Slot != EquipmentSlot.None
                 && Enum.IsDefined(Slot);
         }
     }
@@ -44,6 +45,7 @@ namespace RPG2D.Features.PlayerData
 
     public enum EquipmentSlot
     {
+        None,
         MainHand,
         OffHand,
         Head,
