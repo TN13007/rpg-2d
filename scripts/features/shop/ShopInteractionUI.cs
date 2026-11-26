@@ -160,7 +160,9 @@ namespace RPG2D.Features.Shop
                     $"Giá mua: {option.UnitPrice:N0} vàng / món",
                     $"Còn lại: {option.Stock}",
                     currency,
-                    $"Số lượng mua: {shopData.SelectedQuantity}",
+                    option.Stock > 0
+                        ? $"Số lượng mua: {shopData.SelectedQuantity}"
+                        : "Hết hàng",
                     feedback
                 );
                 return;

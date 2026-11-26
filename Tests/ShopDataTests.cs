@@ -153,6 +153,31 @@ namespace RPG2D.Tests
         }
 
         [Fact]
+        public void ConfirmSelection_WhenPurchaseLeavesLessStock_ClampsQuantityForNextPurchase()
+        {
+            ItemDatabase itemDatabase = CreateItemDatabase();
+            PlayerData playerData = new(1000);
+            ShopData shopData = new(CreateShop(), playerData, itemDatabase);
+
+            shopData.ChangeQuantity(1);
+            shopData.ChangeQuantity(1);
+            shopData.ChangeQuantity(1);
+
+            Assert.Equal(4, shopData.SelectedQuantity);
+
+            shopData.ConfirmSelection();
+
+            Assert.Equal(1, shopData.Items[0].Stock);
+            Assert.Equal(1, shopData.SelectedQuantity);
+
+            shopData.ConfirmSelection();
+
+            Assert.Equal(0, shopData.Items[0].Stock);
+            Assert.Equal(5, playerData.GetItemQuantity("item_a"));
+            Assert.Equal(500, playerData.Currency);
+        }
+
+        [Fact]
         public void ShopData_WhenBuying_ExposesCatalogAndPlayerData()
         {
             ItemDatabase itemDatabase = CreateItemDatabase();

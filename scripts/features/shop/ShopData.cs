@@ -335,6 +335,11 @@ namespace RPG2D.Features.Shop
             }
 
             shopItem.Stock -= _selectedQuantity;
+            if (shopItem.Stock > 0)
+            {
+                _selectedQuantity = Math.Min(_selectedQuantity, shopItem.Stock);
+            }
+
             _feedback = new ShopFeedback(
                 ShopFeedbackKind.PurchaseSucceeded,
                 itemName: item.Name,
