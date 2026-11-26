@@ -27,6 +27,6 @@ Currency is not an Inventory item. Shop purchases do not allow debt. The Shop de
 
 ## Feature boundaries
 
-Shop owns purchase stock, buyback prices and transaction UI. It delegates purchases to `PlayerData.TryPurchaseItem` and sales to `PlayerData.TrySellItem`. Purchase stock decreases only after a purchase succeeds. The sell list is built from the player's current Inventory stacks, grouped by item ID; items without a configured buyback price remain visible but cannot be sold.
+Shop data owns purchase stock and buyback prices. `ShopSession` coordinates Shop-side selection and transaction flow, but delegates player-data mutations to `PlayerData.TryPurchaseItem` and `PlayerData.TrySellItem`. `ShopInteractionPresenter` formats session state for display and `ShopInteractionUI` renders it. The UI must not edit Inventory or currency directly.
 
 Gift and future item-reward features should use `TryRemoveItem` and `TryAddItem` rather than editing the Inventory collection.
