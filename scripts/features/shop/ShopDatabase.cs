@@ -36,10 +36,10 @@ namespace RPG2D.Features.Shop
         public string Name { get; set; } = string.Empty;
 
         [JsonPropertyName("items")]
-        public List<ShopItemDefinition> Items { get; set; } = new();
+        public List<ShopItemDefinition> Items { get; set; } = null!;
 
         [JsonPropertyName("buybackPrices")]
-        public List<ShopBuybackDefinition> BuybackPrices { get; set; } = new();
+        public List<ShopBuybackDefinition> BuybackPrices { get; set; } = null!;
 
         public bool TryGetBuybackPrice(string itemId, out int price)
         {
@@ -106,18 +106,36 @@ namespace RPG2D.Features.Shop
                 throw new JsonException("Shop data must contain an id, name, items and buybackPrices.");
             }
 
-            shop.Items.RemoveAll(
-                item => string.IsNullOrWhiteSpace(item.ItemId) ||
+            HashSet<string> seenShopItems = new(StringComparer.OrdinalIgnoreCase);
+            for (int index = 0; index < shop.Items.Count; index++)
+            {
+                ShopItemDefinition? item = shop.Items[index];
+                if (item == null ||
+                    string.IsNullOrWhiteSpace(item.ItemId) ||
                     item.Price < 0 ||
-                    item.Stock < 0
-            );
+                    item.Stock < 0 ||
+                    !seenShopItems.Add(item.ItemId))
+                {
+                    throw new JsonException(
+                        $"Shop item at index {index} is invalid or has a duplicate itemId."
+                    );
+                }
+            }
 
             HashSet<string> seenBuybackItems = new(StringComparer.OrdinalIgnoreCase);
-            shop.BuybackPrices.RemoveAll(
-                entry => string.IsNullOrWhiteSpace(entry.ItemId) ||
-                    entry.Price <= 0 ||
-                    !seenBuybackItems.Add(entry.ItemId)
-            );
+            for (int index = 0; index < shop.BuybackPrices.Count; index++)
+            {
+                ShopBuybackDefinition? entry = shop.BuybackPrices[index];
+                if (entry == null ||
+                    string.IsNullOrWhiteSpace(entry.ItemId) ||
+                    entry.Price < 0 ||
+                    !seenBuybackItems.Add(entry.ItemId))
+                {
+                    throw new JsonException(
+                        $"Shop buyback entry at index {index} is invalid or has a duplicate itemId."
+                    );
+                }
+            }
 
             return shop;
         }
