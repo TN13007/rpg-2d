@@ -14,9 +14,9 @@ This document describes how gameplay features share player currency and Inventor
 - `Currency`: read-only current balance.
 - `TryAddCurrency(amount)`: adds a positive amount if the balance will not overflow.
 - `TrySpendCurrency(amount, allowDebt = false)`: spends a positive amount. Debt is denied by default and must be explicitly allowed by the caller.
-- `TryPurchaseItem(itemDefinition, unitPrice, quantity, out failureReason)`: validates funds and item addition, adds through `TryAddItem`, then deducts currency. If validation or item addition fails, neither currency nor Inventory changes.
+- `TryPurchaseItem(item, unitPrice, quantity, out failureReason)`: validates funds and item addition, adds through `TryAddItem`, then deducts currency. If validation or item addition fails, neither currency nor Inventory changes.
 
-Currency is not an Inventory item. Shop purchases do not allow debt.
+Currency is not an Inventory item. Shop purchases do not allow debt. The Shop debug controls can add or spend 1,000 vàng per click; spending is rejected when the balance is insufficient.
 
 ## Loading
 
