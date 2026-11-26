@@ -277,17 +277,19 @@ namespace RPG2D.Tests
         public void TryPurchaseItem_WhenInventoryRejectsItem_DoesNotDeductCurrency()
         {
             PlayerData playerData = new(500);
-            EquipmentItem invalidEquipment = new()
+            ConsumableItem existingItem = CreateStackableItem();
+            Assert.True(playerData.TryAddItem(existingItem, 1));
+
+            QuestItem incompatibleItem = new()
             {
-                Id = "invalid_equipment",
-                Name = "Invalid",
+                Id = existingItem.Id,
+                Name = existingItem.Name,
                 Stackable = true,
-                MaxStackSize = 5,
-                Slot = EquipmentSlot.MainHand
+                MaxStackSize = 10
             };
 
             bool purchased = playerData.TryPurchaseItem(
-                invalidEquipment,
+                incompatibleItem,
                 100,
                 1,
                 out string failureReason
@@ -296,7 +298,8 @@ namespace RPG2D.Tests
             Assert.False(purchased);
             Assert.Equal("Không thể thêm vật phẩm vào Inventory.", failureReason);
             Assert.Equal(500, playerData.Currency);
-            Assert.False(playerData.HasItem(invalidEquipment.Id));
+            Assert.Equal(1, playerData.GetItemQuantity(existingItem.Id));
+            Assert.Same(existingItem, playerData.Inventory[0].Item);
         }
     }
 }
