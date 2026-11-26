@@ -13,7 +13,6 @@ namespace RPG2D.Features.Shop
         private ItemDatabase? _itemDatabase;
         private ShopInteractionUI _shopUi = null!;
         private ShopData? _shopData;
-        private bool _tabWasPressed;
 
         public bool IsOpen => _shopData != null && _shopUi.IsShopVisible;
 
@@ -51,7 +50,6 @@ namespace RPG2D.Features.Shop
             }
 
             _shopData = new ShopData(shop, _playerData, _itemDatabase);
-            _tabWasPressed = false;
             RefreshUI();
             return true;
         }
@@ -59,7 +57,6 @@ namespace RPG2D.Features.Shop
         public void Close()
         {
             _shopData = null;
-            _tabWasPressed = false;
             _shopUi.HideShop();
         }
 
@@ -69,19 +66,6 @@ namespace RPG2D.Features.Shop
             {
                 return;
             }
-
-            bool tabPressed = Input.IsKeyPressed(Key.Tab);
-            if (tabPressed && !_tabWasPressed)
-            {
-                ShopMode nextMode = _shopData.Mode == ShopMode.Buying
-                    ? ShopMode.Selling
-                    : ShopMode.Buying;
-                SetMode(nextMode);
-                _tabWasPressed = true;
-                return;
-            }
-
-            _tabWasPressed = tabPressed;
 
             if (Input.IsActionJustPressed("interaction_menu_up"))
             {
