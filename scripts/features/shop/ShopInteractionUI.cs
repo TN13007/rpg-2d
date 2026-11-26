@@ -119,7 +119,7 @@ namespace RPG2D.Features.Shop
             string currency = $"Tiền hiện có: {shopData.Currency:N0} vàng";
             string feedback = FormatFeedback(shopData.Feedback);
 
-            if (mode == ShopMode.Buying)
+            if (shopData.Mode == ShopMode.Buying)
             {
                 if (shopData.SelectedIndex == items.Count)
                 {
