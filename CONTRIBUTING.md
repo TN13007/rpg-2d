@@ -47,7 +47,22 @@ Match additional verification to the change:
 
 Record exact commands and observed results. Separate automated tests, Godot editor/build checks and manual playtesting. List anything not tested. Diagnose and fix failures from code and logs before requesting user help; do not delegate routine technical debugging to the project owner.
 
-## 5. Open and maintain a Pull Request
+## 5. Keep documentation synchronized
+
+Documentation impact must be reviewed for every task, not only when the task is labeled as documentation work.
+
+When a change affects lasting project knowledge, update the existing canonical document in the same branch and PR:
+- Player experience, gameplay rules and design decisions → relevant document under `Docs/Design/`.
+- Technical responsibilities, data flow, API contracts, schemas and architecture → relevant document under `Docs/Architecture/` or the owning feature documentation.
+- Project entry, installation, configuration and usage → `README.md` or the existing setup guide.
+- Current project state, blockers and next handoff → `WORKFLOW.md`.
+- Agent behavior and repository collaboration rules → `AGENTS.md` or this file.
+
+Keep documentation synchronized with the implemented behavior. Update obsolete examples, paths, schemas, commands and links. Prefer editing the canonical document over creating duplicates.
+
+The PR must state which documents were updated. When no document needs changing, record that the impact was reviewed and explain briefly why no durable information changed. Do not create session logs or documentation-only churn for trivial internal changes. Missing required documentation updates block implementation-ready status.
+
+## 6. Open and maintain a Pull Request
 
 A PR is one reviewable solution to an Issue and may contain multiple related files and commits. Explain the problem, outcome, solution, decisions, non-goals, limitations and verification evidence. Use the PR template.
 
@@ -55,7 +70,7 @@ Link Issues accurately: `Closes #N` only when completed; `Part of #N` for partia
 
 Update the PR as fixes are pushed. Record the exact commit and verification evidence; do not leave stale test results presented as current.
 
-## 6. CI, review and merge
+## 7. CI, review and merge
 
 CI is a hard gate before an implementation is reported as ready or handed to the project owner for experiential playtesting.
 
@@ -66,17 +81,17 @@ CI is a hard gate before an implementation is reported as ready or handed to the
 - Request manual playtesting only for behavior that cannot be reliably verified automatically, and only after the CI gate passes. When the owner reports a defect, resume implementation and verification; pass CI again before the next handoff.
 - Mark the PR ready for review only when implementation and required verification are complete. The repository owner reviews and merges. Do not merge your own PR unless explicitly requested.
 
-## 7. Implementation-ready and Definition of Done
+## 8. Implementation-ready and Definition of Done
 
-**Implementation-ready for owner review** means acceptance criteria are met, relevant code/tests/data/docs are updated, local and feature-specific checks pass, the full diff has been reviewed, and all required CI checks pass on the latest PR head commit. Any required experiential validation must also be completed by the owner, or clearly identified as the only remaining owner decision.
+**Implementation-ready for owner review** means acceptance criteria are met, relevant code/tests/data are updated, documentation impact has been reviewed and affected canonical docs are synchronized (or the PR records why no update is needed), local and feature-specific checks pass, the full diff has been reviewed, and all required CI checks pass on the latest PR head commit. Any required experiential validation must also be completed by the owner, or clearly identified as the only remaining owner decision.
 
 A task is **closed/done in the repository** only when the owner has reviewed and merged the PR and the linked Issue is resolved. Implementation-ready and merged are distinct states: the agent is responsible for preparing a complete, verified PR; merge authority stays with the repository owner.
 
-## 8. Canonical engineering standards
+## 9. Canonical engineering standards
 
 [Coding standards](Docs/Architecture/CodingStandards.md) is the single source of truth for C#, Godot resources/scenes/nodes, data, naming, architecture boundaries and error handling. [Testing strategy](Docs/Architecture/TestingStrategy.md) owns test levels, test naming, fixtures and manual verification requirements.
 
-## 9. Documentation governance
+## 10. Documentation governance
 
 - `README.md`: project entry point.
 - `WORKFLOW.md`: current status, delivery handoff and learning evidence.
