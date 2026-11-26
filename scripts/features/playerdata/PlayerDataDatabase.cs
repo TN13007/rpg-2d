@@ -9,6 +9,7 @@ namespace RPG2D.Features.PlayerData
     {
         [JsonPropertyName("currency")]
         public int Currency { get; set; }
+
         [JsonPropertyName("inventory")]
         public List<PlayerItemStackData?> Inventory { get; set; } = new();
     }
@@ -17,6 +18,7 @@ namespace RPG2D.Features.PlayerData
     {
         [JsonPropertyName("itemId")]
         public string ItemId { get; set; } = string.Empty;
+
         [JsonPropertyName("quantity")]
         public int Quantity { get; set; }
     }
@@ -27,14 +29,16 @@ namespace RPG2D.Features.PlayerData
 
         public static PlayerData Load(ItemDatabase itemDatabase)
         {
+            PlayerData playerData = new();
             Godot.FileAccess? file = Godot.FileAccess.Open(
                 PlayerDataPath,
                 Godot.FileAccess.ModeFlags.Read
             );
+
             if (file == null)
             {
-                GD.PushWarning($"Could not read player data '{PlayerDataPath}'.");
-                return new PlayerData();
+                GD.PushWarning("Could not read player data '" + PlayerDataPath + "'.");
+                return playerData;
             }
 
             string json = file.GetAsText();
@@ -45,7 +49,7 @@ namespace RPG2D.Features.PlayerData
                 PlayerDataManifest? manifest = JsonSerializer.Deserialize<PlayerDataManifest>(json);
                 if (manifest == null || manifest.Currency < 0 || manifest.Inventory == null)
                 {
-                    GD.PushWarning($"Invalid player data '{PlayerDataPath}'.");
+                    GD.PushWarning("Invalid player data '" + PlayerDataPath + "'.");
                     return new PlayerData();
                 }
 
@@ -54,19 +58,20 @@ namespace RPG2D.Features.PlayerData
                 {
                     if (stack == null ||
                         stack.Quantity <= 0 ||
-                        !itemDatabase.TryGetItem(stack.ItemId, out ItemDefinition item) ||
+                        !itemDatabase.TryGetItem(stack.ItemId, out Item item) ||
                         !playerData.TryAddItem(item, stack.Quantity))
                     {
-                        GD.PushWarning($"Skipping invalid inventory stack in '{PlayerDataPath}'.");
+                        GD.PushWarning("Skipping invalid inventory stack in '" + PlayerDataPath + "'.");
                     }
                 }
-                return playerData;
             }
             catch (JsonException exception)
             {
-                GD.PushWarning($"Invalid player data JSON: {exception.Message}");
+                GD.PushWarning("Invalid player data JSON: " + exception.Message);
                 return new PlayerData();
             }
+
+            return playerData;
         }
     }
 }

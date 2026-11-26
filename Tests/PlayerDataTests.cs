@@ -5,9 +5,9 @@ namespace RPG2D.Tests
 {
     public sealed class PlayerDataTests
     {
-        private static ItemDefinition CreateStackableItem(int maxStackSize = 20)
+        private static ConsumableItem CreateStackableItem(int maxStackSize = 20)
         {
-            return new ItemDefinition
+            return new ConsumableItem
             {
                 Id = "health_potion",
                 Name = "Bình máu",
@@ -16,14 +16,15 @@ namespace RPG2D.Tests
             };
         }
 
-        private static ItemDefinition CreateNonStackableItem()
+        private static EquipmentItem CreateNonStackableItem()
         {
-            return new ItemDefinition
+            return new EquipmentItem
             {
                 Id = "iron_sword",
                 Name = "Kiếm sắt",
                 Stackable = false,
-                MaxStackSize = 1
+                MaxStackSize = 1,
+                Slot = EquipmentSlot.MainHand
             };
         }
 
@@ -37,13 +38,14 @@ namespace RPG2D.Tests
             Assert.True(added);
             Assert.Equal(1, playerData.GetItemQuantity("iron_sword"));
             Assert.Single(playerData.Inventory);
+            Assert.IsType<EquipmentItem>(playerData.Inventory[0].Item);
         }
 
         [Fact]
         public void TryAddItem_WhenStackExists_IncreasesItsQuantity()
         {
             PlayerData playerData = new();
-            ItemDefinition item = CreateStackableItem();
+            ConsumableItem item = CreateStackableItem();
 
             Assert.True(playerData.TryAddItem(item, 1));
             Assert.True(playerData.TryAddItem(item, 2));
@@ -51,13 +53,14 @@ namespace RPG2D.Tests
             Assert.Equal(3, playerData.GetItemQuantity(item.Id));
             Assert.Single(playerData.Inventory);
             Assert.Equal(3, playerData.Inventory[0].Quantity);
+            Assert.Same(item, playerData.Inventory[0].Item);
         }
 
         [Fact]
         public void TryAddItem_WhenQuantityExceedsStackLimit_FillsAndCreatesAnotherStack()
         {
             PlayerData playerData = new();
-            ItemDefinition item = CreateStackableItem();
+            ConsumableItem item = CreateStackableItem();
 
             Assert.True(playerData.TryAddItem(item, 19));
             Assert.True(playerData.TryAddItem(item, 5));
@@ -66,13 +69,14 @@ namespace RPG2D.Tests
             Assert.Equal(2, playerData.Inventory.Count);
             Assert.Equal(20, playerData.Inventory[0].Quantity);
             Assert.Equal(4, playerData.Inventory[1].Quantity);
+            Assert.All(playerData.Inventory, stack => Assert.Same(item, stack.Item));
         }
 
         [Fact]
         public void TryAddItem_WhenItemIsNotStackable_CreatesOneStackPerItem()
         {
             PlayerData playerData = new();
-            ItemDefinition item = CreateNonStackableItem();
+            EquipmentItem item = CreateNonStackableItem();
 
             bool added = playerData.TryAddItem(item, 3);
 
@@ -86,7 +90,7 @@ namespace RPG2D.Tests
         public void HasItem_WhenQuantityIsAvailable_ReturnsTrue()
         {
             PlayerData playerData = new();
-            ItemDefinition item = CreateStackableItem();
+            ConsumableItem item = CreateStackableItem();
             Assert.True(playerData.TryAddItem(item, 3));
 
             Assert.True(playerData.HasItem(item.Id));
@@ -98,7 +102,7 @@ namespace RPG2D.Tests
         public void TryRemoveItem_WhenQuantitySpansMultipleStacks_RemovesAcrossStacks()
         {
             PlayerData playerData = new();
-            ItemDefinition item = CreateStackableItem(5);
+            ConsumableItem item = CreateStackableItem(5);
             Assert.True(playerData.TryAddItem(item, 7));
 
             bool removed = playerData.TryRemoveItem(item.Id, 6);
@@ -107,13 +111,14 @@ namespace RPG2D.Tests
             Assert.Equal(1, playerData.GetItemQuantity(item.Id));
             Assert.Single(playerData.Inventory);
             Assert.Equal(1, playerData.Inventory[0].Quantity);
+            Assert.Same(item, playerData.Inventory[0].Item);
         }
 
         [Fact]
         public void TryRemoveItem_WhenQuantityIsInsufficient_DoesNotChangeInventory()
         {
             PlayerData playerData = new();
-            ItemDefinition item = CreateStackableItem();
+            ConsumableItem item = CreateStackableItem();
             Assert.True(playerData.TryAddItem(item, 3));
 
             bool removed = playerData.TryRemoveItem(item.Id, 4);
@@ -128,7 +133,7 @@ namespace RPG2D.Tests
         public void TryRemoveItem_WhenStackBecomesEmpty_RemovesTheStack()
         {
             PlayerData playerData = new();
-            ItemDefinition item = CreateStackableItem();
+            ConsumableItem item = CreateStackableItem();
             Assert.True(playerData.TryAddItem(item, 2));
 
             bool removed = playerData.TryRemoveItem(item.Id, 2);
@@ -155,12 +160,13 @@ namespace RPG2D.Tests
         public void TryAddItem_WhenDefinitionIsInvalid_FailsWithoutChangingInventory()
         {
             PlayerData playerData = new();
-            ItemDefinition invalidItem = new()
+            EquipmentItem invalidItem = new()
             {
                 Id = "invalid_item",
                 Name = "Invalid",
                 Stackable = false,
-                MaxStackSize = 10
+                MaxStackSize = 10,
+                Slot = EquipmentSlot.MainHand
             };
 
             bool added = playerData.TryAddItem(invalidItem, 1);
@@ -173,7 +179,7 @@ namespace RPG2D.Tests
         public void TryAddItem_WhenTotalQuantityWouldOverflow_FailsWithoutChangingInventory()
         {
             PlayerData playerData = new();
-            ItemDefinition item = CreateStackableItem(int.MaxValue);
+            ConsumableItem item = CreateStackableItem(int.MaxValue);
             Assert.True(playerData.TryAddItem(item, int.MaxValue));
 
             bool added = playerData.TryAddItem(item, 1);
@@ -194,13 +200,61 @@ namespace RPG2D.Tests
         }
 
         [Fact]
-        public void TryPurchaseItem_WhenFundsAndInventoryAreValid_AddsItemAndDeductsCurrency()
+        public void TryAddCurrency_WhenAmountIsPositive_IncreasesBalance()
+        {
+            PlayerData playerData = new(100);
+            Assert.True(playerData.TryAddCurrency(50));
+            Assert.Equal(150, playerData.Currency);
+        }
+
+        [Theory]
+        [InlineData(0)]
+        [InlineData(-1)]
+        public void TryAddCurrency_WhenAmountIsNotPositive_FailsWithoutChangingBalance(int amount)
+        {
+            PlayerData playerData = new(100);
+            Assert.False(playerData.TryAddCurrency(amount));
+            Assert.Equal(100, playerData.Currency);
+        }
+
+        [Fact]
+        public void TryAddCurrency_WhenBalanceWouldOverflow_FailsWithoutChangingBalance()
+        {
+            PlayerData playerData = new(int.MaxValue);
+            Assert.False(playerData.TryAddCurrency(1));
+            Assert.Equal(int.MaxValue, playerData.Currency);
+        }
+
+        [Fact]
+        public void TrySpendCurrency_WhenFundsAreAvailable_DecreasesBalance()
+        {
+            PlayerData playerData = new(100);
+            Assert.True(playerData.TrySpendCurrency(40));
+            Assert.Equal(60, playerData.Currency);
+        }
+
+        [Fact]
+        public void TrySpendCurrency_WhenFundsAreInsufficient_FailsWithoutChangingBalance()
+        {
+            PlayerData playerData = new(50);
+            Assert.False(playerData.TrySpendCurrency(51));
+            Assert.Equal(50, playerData.Currency);
+        }
+
+        [Fact]
+        public void TrySpendCurrency_WhenDebtIsAllowed_CanMakeBalanceNegative()
+        {
+            PlayerData playerData = new(50);
+            Assert.True(playerData.TrySpendCurrency(75, allowDebt: true));
+            Assert.Equal(-25, playerData.Currency);
+        }
+
+        [Fact]
+        public void TryPurchaseItem_WhenPurchaseIsValid_AddsItemAndDeductsCurrency()
         {
             PlayerData playerData = new(500);
-            ItemDefinition item = CreateStackableItem();
-
+            ConsumableItem item = CreateStackableItem();
             bool purchased = playerData.TryPurchaseItem(item, 100, 2, out string failureReason);
-
             Assert.True(purchased);
             Assert.Empty(failureReason);
             Assert.Equal(300, playerData.Currency);
@@ -208,65 +262,41 @@ namespace RPG2D.Tests
         }
 
         [Fact]
-        public void TryPurchaseItem_WhenFundsAreInsufficient_ChangesNothing()
+        public void TryPurchaseItem_WhenFundsAreInsufficient_DoesNotChangePlayerData()
         {
-            PlayerData playerData = new(50);
-            ItemDefinition item = CreateStackableItem();
-
-            bool purchased = playerData.TryPurchaseItem(item, 100, 1, out string failureReason);
-
+            PlayerData playerData = new(100);
+            ConsumableItem item = CreateStackableItem();
+            bool purchased = playerData.TryPurchaseItem(item, 100, 2, out string failureReason);
             Assert.False(purchased);
-            Assert.NotEmpty(failureReason);
-            Assert.Equal(50, playerData.Currency);
+            Assert.Equal("Bạn không đủ tiền.", failureReason);
+            Assert.Equal(100, playerData.Currency);
             Assert.Equal(0, playerData.GetItemQuantity(item.Id));
         }
 
         [Fact]
-        public void TryPurchaseItem_WhenInventoryAddFails_ChangesNeitherCurrencyNorInventory()
+        public void TryPurchaseItem_WhenInventoryRejectsItem_DoesNotDeductCurrency()
         {
             PlayerData playerData = new(500);
-            ItemDefinition item = CreateStackableItem(int.MaxValue);
-            Assert.True(playerData.TryAddItem(item, int.MaxValue));
+            EquipmentItem invalidEquipment = new()
+            {
+                Id = "invalid_equipment",
+                Name = "Invalid",
+                Stackable = true,
+                MaxStackSize = 5,
+                Slot = EquipmentSlot.MainHand
+            };
 
-            bool purchased = playerData.TryPurchaseItem(item, 100, 1, out string failureReason);
+            bool purchased = playerData.TryPurchaseItem(
+                invalidEquipment,
+                100,
+                1,
+                out string failureReason
+            );
 
             Assert.False(purchased);
-            Assert.NotEmpty(failureReason);
+            Assert.Equal("Không thể thêm vật phẩm vào Inventory.", failureReason);
             Assert.Equal(500, playerData.Currency);
-            Assert.Equal(int.MaxValue, playerData.GetItemQuantity(item.Id));
-        }
-
-        [Fact]
-        public void TryAddCurrency_WhenAmountIsPositive_IncreasesBalance()
-        {
-            PlayerData playerData = new(100);
-
-            bool added = playerData.TryAddCurrency(50);
-
-            Assert.True(added);
-            Assert.Equal(150, playerData.Currency);
-        }
-
-        [Fact]
-        public void TrySpendCurrency_WhenInsufficientAndDebtIsNotAllowed_ChangesNothing()
-        {
-            PlayerData playerData = new(10);
-
-            bool spent = playerData.TrySpendCurrency(20);
-
-            Assert.False(spent);
-            Assert.Equal(10, playerData.Currency);
-        }
-
-        [Fact]
-        public void TrySpendCurrency_WhenDebtIsAllowed_CanMakeBalanceNegative()
-        {
-            PlayerData playerData = new(10);
-
-            bool spent = playerData.TrySpendCurrency(20, allowDebt: true);
-
-            Assert.True(spent);
-            Assert.Equal(-10, playerData.Currency);
+            Assert.False(playerData.HasItem(invalidEquipment.Id));
         }
     }
 }

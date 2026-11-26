@@ -25,6 +25,8 @@ namespace RPG2D.Features.Shop
             AddChild(_shopUi);
             _shopUi.ItemHovered += SelectItem;
             _shopUi.ItemConfirmed += OnItemConfirmed;
+            _shopUi.CurrencyIncreaseRequested += IncreaseCurrency;
+            _shopUi.CurrencyDecreaseRequested += DecreaseCurrency;
         }
 
         public void Configure(PlayerDataState playerData, ItemDatabase itemDatabase)
@@ -49,7 +51,7 @@ namespace RPG2D.Features.Shop
             foreach (ShopItemDefinition shopItem in _shop.Items)
             {
                 itemNames.Add(
-                    _itemDatabase.TryGetItem(shopItem.ItemId, out ItemDefinition item)
+                    _itemDatabase.TryGetItem(shopItem.ItemId, out Item item)
                         ? item.Name
                         : $"Không rõ: {shopItem.ItemId}"
                 );
@@ -169,7 +171,7 @@ namespace RPG2D.Features.Shop
             }
 
             ShopItemDefinition shopItem = _shop.Items[_selectedIndex];
-            if (!_itemDatabase.TryGetItem(shopItem.ItemId, out ItemDefinition item))
+            if (!_itemDatabase.TryGetItem(shopItem.ItemId, out Item item))
             {
                 UpdateDetails("Không tìm thấy dữ liệu vật phẩm.");
                 return;
@@ -196,6 +198,28 @@ namespace RPG2D.Features.Shop
             UpdateDetails($"Đã mua {item.Name} × {_selectedQuantity}.");
         }
 
+        private void IncreaseCurrency()
+        {
+            if (_playerData.TryAddCurrency(1000))
+            {
+                UpdateDetails("Đã cộng 1.000 vàng để kiểm thử.");
+                return;
+            }
+
+            UpdateDetails("Không thể cộng thêm vàng (vượt giới hạn).");
+        }
+
+        private void DecreaseCurrency()
+        {
+            if (_playerData.TrySpendCurrency(1000))
+            {
+                UpdateDetails("Đã trừ 1.000 vàng để kiểm thử.");
+                return;
+            }
+
+            UpdateDetails("Không đủ vàng để trừ 1.000.");
+        }
+
         private void UpdateDetails(string feedback)
         {
             if (_shop == null)
@@ -218,7 +242,7 @@ namespace RPG2D.Features.Shop
             }
 
             ShopItemDefinition shopItem = _shop.Items[_selectedIndex];
-            if (!_itemDatabase.TryGetItem(shopItem.ItemId, out ItemDefinition item))
+            if (!_itemDatabase.TryGetItem(shopItem.ItemId, out Item item))
             {
                 _shopUi.ShowDetails(
                     "Không rõ vật phẩm",

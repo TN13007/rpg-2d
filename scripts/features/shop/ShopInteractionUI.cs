@@ -8,6 +8,8 @@ namespace RPG2D.Features.Shop
     {
         public event Action<int>? ItemHovered;
         public event Action<int>? ItemConfirmed;
+        public event Action? CurrencyIncreaseRequested;
+        public event Action? CurrencyDecreaseRequested;
         public bool IsShopVisible => _shopPanel != null && _shopPanel.Visible;
 
         private sealed class ShopRow
@@ -202,6 +204,29 @@ namespace RPG2D.Features.Shop
                 AutowrapMode = TextServer.AutowrapMode.WordSmart
             };
             detailContent.AddChild(_feedbackLabel);
+
+            HBoxContainer debugCurrencyControls = new()
+            {
+                Alignment = BoxContainer.AlignmentMode.End
+            };
+            debugCurrencyControls.AddThemeConstantOverride("separation", 8);
+            content.AddChild(debugCurrencyControls);
+
+            Button increaseCurrencyButton = new()
+            {
+                Text = "+1.000 vàng",
+                TooltipText = "Cộng 1.000 vàng để kiểm thử Shop."
+            };
+            increaseCurrencyButton.Pressed += () => CurrencyIncreaseRequested?.Invoke();
+            debugCurrencyControls.AddChild(increaseCurrencyButton);
+
+            Button decreaseCurrencyButton = new()
+            {
+                Text = "-1.000 vàng",
+                TooltipText = "Trừ 1.000 vàng để kiểm thử Shop."
+            };
+            decreaseCurrencyButton.Pressed += () => CurrencyDecreaseRequested?.Invoke();
+            debugCurrencyControls.AddChild(decreaseCurrencyButton);
 
             Label controlsLabel = new()
             {
