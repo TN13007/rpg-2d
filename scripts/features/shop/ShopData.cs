@@ -91,7 +91,7 @@ namespace RPG2D.Features.Shop
         private readonly PlayerDataState _playerData;
         private readonly ItemDatabase _itemDatabase;
 
-        private ShopMode _mode = ShopMode.Buying;
+        private readonly ShopMode _mode;
         private int _selectedIndex;
         private int _selectedQuantity = 1;
         private ShopFeedback _feedback = ShopFeedback.None;
@@ -99,12 +99,20 @@ namespace RPG2D.Features.Shop
         public ShopData(
             ShopDefinition shop,
             PlayerDataState playerData,
-            ItemDatabase itemDatabase
+            ItemDatabase itemDatabase,
+            ShopMode mode = ShopMode.Buying
         )
         {
             _shop = shop ?? throw new ArgumentNullException(nameof(shop));
             _playerData = playerData ?? throw new ArgumentNullException(nameof(playerData));
             _itemDatabase = itemDatabase ?? throw new ArgumentNullException(nameof(itemDatabase));
+
+            if (!Enum.IsDefined(mode))
+            {
+                throw new ArgumentOutOfRangeException(nameof(mode));
+            }
+
+            _mode = mode;
         }
 
         public string ShopName => _shop.Name;
@@ -114,19 +122,6 @@ namespace RPG2D.Features.Shop
         public int SelectedQuantity => _selectedQuantity;
         public int Currency => _playerData.Currency;
         public ShopFeedback Feedback => _feedback;
-
-        public void SetMode(ShopMode mode)
-        {
-            if (_mode == mode)
-            {
-                return;
-            }
-
-            _mode = mode;
-            _selectedIndex = Math.Clamp(_selectedIndex, 0, BuildItems().Count);
-            _selectedQuantity = 1;
-            _feedback = ShopFeedback.None;
-        }
 
         public void MoveSelection(int direction)
         {
