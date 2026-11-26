@@ -1,52 +1,19 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.Json.Serialization;
 
 namespace RPG2D.Features.PlayerData
 {
-    public sealed class ItemDefinition
-    {
-        [JsonPropertyName("id")]
-        public string Id { get; init; } = string.Empty;
-
-        [JsonPropertyName("name")]
-        public string Name { get; init; } = string.Empty;
-
-        [JsonPropertyName("description")]
-        public string Description { get; init; } = string.Empty;
-
-        [JsonPropertyName("stackable")]
-        public bool Stackable { get; init; } = true;
-
-        [JsonPropertyName("maxStackSize")]
-        public int MaxStackSize { get; init; } = 99;
-
-        public bool IsValid()
-        {
-            if (string.IsNullOrWhiteSpace(Id) || string.IsNullOrWhiteSpace(Name))
-            {
-                return false;
-            }
-
-            if (Stackable)
-            {
-                return MaxStackSize > 0;
-            }
-
-            return MaxStackSize == 1;
-        }
-    }
-
     public sealed class PlayerItemStack
     {
-        internal PlayerItemStack(string itemId, int quantity)
+        internal PlayerItemStack(Item item, int quantity)
         {
-            ItemId = itemId;
+            Item = item;
             Quantity = quantity;
         }
 
-        public string ItemId { get; }
+        public Item Item { get; }
+        public string ItemId => Item.Id;
         public int Quantity { get; }
     }
 
@@ -86,14 +53,14 @@ namespace RPG2D.Features.PlayerData
             return quantity > 0 && GetItemQuantity(itemId) >= quantity;
         }
 
-        public bool TryAddItem(ItemDefinition itemDefinition, int quantity)
+        public bool TryAddItem(Item item, int quantity)
         {
-            if (itemDefinition == null || !itemDefinition.IsValid() || quantity <= 0)
+            if (item == null || !item.IsValid() || quantity <= 0)
             {
                 return false;
             }
 
-            long currentQuantity = GetItemQuantity(itemDefinition.Id);
+            long currentQuantity = GetItemQuantity(item.Id);
             if (currentQuantity + quantity > int.MaxValue)
             {
                 return false;
@@ -104,38 +71,39 @@ namespace RPG2D.Features.PlayerData
             {
                 if (string.Equals(
                     stack.ItemId,
-                    itemDefinition.Id,
+                    item.Id,
                     StringComparison.OrdinalIgnoreCase
                 ))
                 {
                     if (stack.Quantity <= 0 ||
-                        (itemDefinition.Stackable && stack.Quantity > itemDefinition.MaxStackSize) ||
-                        (!itemDefinition.Stackable && stack.Quantity != 1))
+                        !AreCompatibleDefinitions(stack.Item, item) ||
+                        (item.Stackable && stack.Quantity > item.MaxStackSize) ||
+                        (!item.Stackable && stack.Quantity != 1))
                     {
                         return false;
                     }
                 }
 
-                updatedInventory.Add(new PlayerItemStack(stack.ItemId, stack.Quantity));
+                updatedInventory.Add(new PlayerItemStack(stack.Item, stack.Quantity));
             }
 
             int remaining = quantity;
 
-            if (itemDefinition.Stackable)
+            if (item.Stackable)
             {
                 for (int index = 0; index < updatedInventory.Count && remaining > 0; index++)
                 {
                     PlayerItemStack stack = updatedInventory[index];
                     if (!string.Equals(
                         stack.ItemId,
-                        itemDefinition.Id,
+                        item.Id,
                         StringComparison.OrdinalIgnoreCase
                     ))
                     {
                         continue;
                     }
 
-                    int availableSpace = itemDefinition.MaxStackSize - stack.Quantity;
+                    int availableSpace = item.MaxStackSize - stack.Quantity;
                     int amountToAdd = Math.Min(availableSpace, remaining);
                     if (amountToAdd <= 0)
                     {
@@ -143,7 +111,7 @@ namespace RPG2D.Features.PlayerData
                     }
 
                     updatedInventory[index] = new PlayerItemStack(
-                        stack.ItemId,
+                        stack.Item,
                         stack.Quantity + amountToAdd
                     );
                     remaining -= amountToAdd;
@@ -152,11 +120,11 @@ namespace RPG2D.Features.PlayerData
 
             while (remaining > 0)
             {
-                int amountToAdd = itemDefinition.Stackable
-                    ? Math.Min(itemDefinition.MaxStackSize, remaining)
+                int amountToAdd = item.Stackable
+                    ? Math.Min(item.MaxStackSize, remaining)
                     : 1;
 
-                updatedInventory.Add(new PlayerItemStack(itemDefinition.Id, amountToAdd));
+                updatedInventory.Add(new PlayerItemStack(item, amountToAdd));
                 remaining -= amountToAdd;
             }
 
@@ -189,7 +157,7 @@ namespace RPG2D.Features.PlayerData
                 else
                 {
                     _inventory[index] = new PlayerItemStack(
-                        stack.ItemId,
+                        stack.Item,
                         stack.Quantity - remaining
                     );
                     remaining = 0;
@@ -197,6 +165,23 @@ namespace RPG2D.Features.PlayerData
             }
 
             return remaining == 0;
+        }
+
+        private static bool AreCompatibleDefinitions(Item first, Item second)
+        {
+            if (first.GetType() != second.GetType() ||
+                first.Stackable != second.Stackable ||
+                first.MaxStackSize != second.MaxStackSize)
+            {
+                return false;
+            }
+
+            if (first is EquipmentItem firstEquipment && second is EquipmentItem secondEquipment)
+            {
+                return firstEquipment.Slot == secondEquipment.Slot;
+            }
+
+            return true;
         }
     }
 }

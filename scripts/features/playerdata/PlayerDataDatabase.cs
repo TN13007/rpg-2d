@@ -34,7 +34,7 @@ namespace RPG2D.Features.PlayerData
 
             if (file == null)
             {
-                GD.PushWarning($"Could not read player data '{PlayerDataPath}'.");
+                GD.PushWarning("Could not read player data '" + PlayerDataPath + "'.");
                 return playerData;
             }
 
@@ -46,7 +46,7 @@ namespace RPG2D.Features.PlayerData
                 PlayerDataManifest? manifest = JsonSerializer.Deserialize<PlayerDataManifest>(json);
                 if (manifest == null || manifest.Inventory == null)
                 {
-                    GD.PushWarning($"Invalid player data '{PlayerDataPath}'.");
+                    GD.PushWarning("Invalid player data '" + PlayerDataPath + "'.");
                     return playerData;
                 }
 
@@ -54,16 +54,16 @@ namespace RPG2D.Features.PlayerData
                 {
                     if (stack == null ||
                         stack.Quantity <= 0 ||
-                        !itemDatabase.TryGetItem(stack.ItemId, out ItemDefinition item) ||
+                        !itemDatabase.TryGetItem(stack.ItemId, out Item item) ||
                         !playerData.TryAddItem(item, stack.Quantity))
                     {
-                        GD.PushWarning($"Skipping invalid inventory stack in '{PlayerDataPath}'.");
+                        GD.PushWarning("Skipping invalid inventory stack in '" + PlayerDataPath + "'.");
                     }
                 }
             }
             catch (JsonException exception)
             {
-                GD.PushWarning($"Invalid player data JSON: {exception.Message}");
+                GD.PushWarning("Invalid player data JSON: " + exception.Message);
                 return new PlayerData();
             }
 
