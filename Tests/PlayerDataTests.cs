@@ -198,5 +198,108 @@ namespace RPG2D.Tests
 
             Assert.Equal(2, playerData.GetItemQuantity("HEALTH_POTION"));
         }
+
+        [Fact]
+        public void TryAddCurrency_WhenAmountIsPositive_IncreasesBalance()
+        {
+            PlayerData playerData = new(100);
+            Assert.True(playerData.TryAddCurrency(50));
+            Assert.Equal(150, playerData.Currency);
+        }
+
+        [Theory]
+        [InlineData(0)]
+        [InlineData(-1)]
+        public void TryAddCurrency_WhenAmountIsNotPositive_FailsWithoutChangingBalance(int amount)
+        {
+            PlayerData playerData = new(100);
+            Assert.False(playerData.TryAddCurrency(amount));
+            Assert.Equal(100, playerData.Currency);
+        }
+
+        [Fact]
+        public void TryAddCurrency_WhenBalanceWouldOverflow_FailsWithoutChangingBalance()
+        {
+            PlayerData playerData = new(int.MaxValue);
+            Assert.False(playerData.TryAddCurrency(1));
+            Assert.Equal(int.MaxValue, playerData.Currency);
+        }
+
+        [Fact]
+        public void TrySpendCurrency_WhenFundsAreAvailable_DecreasesBalance()
+        {
+            PlayerData playerData = new(100);
+            Assert.True(playerData.TrySpendCurrency(40));
+            Assert.Equal(60, playerData.Currency);
+        }
+
+        [Fact]
+        public void TrySpendCurrency_WhenFundsAreInsufficient_FailsWithoutChangingBalance()
+        {
+            PlayerData playerData = new(50);
+            Assert.False(playerData.TrySpendCurrency(51));
+            Assert.Equal(50, playerData.Currency);
+        }
+
+        [Fact]
+        public void TrySpendCurrency_WhenDebtIsAllowed_CanMakeBalanceNegative()
+        {
+            PlayerData playerData = new(50);
+            Assert.True(playerData.TrySpendCurrency(75, allowDebt: true));
+            Assert.Equal(-25, playerData.Currency);
+        }
+
+        [Fact]
+        public void TryPurchaseItem_WhenPurchaseIsValid_AddsItemAndDeductsCurrency()
+        {
+            PlayerData playerData = new(500);
+            ConsumableItem item = CreateStackableItem();
+            bool purchased = playerData.TryPurchaseItem(item, 100, 2, out string failureReason);
+            Assert.True(purchased);
+            Assert.Empty(failureReason);
+            Assert.Equal(300, playerData.Currency);
+            Assert.Equal(2, playerData.GetItemQuantity(item.Id));
+        }
+
+        [Fact]
+        public void TryPurchaseItem_WhenFundsAreInsufficient_DoesNotChangePlayerData()
+        {
+            PlayerData playerData = new(100);
+            ConsumableItem item = CreateStackableItem();
+            bool purchased = playerData.TryPurchaseItem(item, 100, 2, out string failureReason);
+            Assert.False(purchased);
+            Assert.Equal("Bạn không đủ tiền.", failureReason);
+            Assert.Equal(100, playerData.Currency);
+            Assert.Equal(0, playerData.GetItemQuantity(item.Id));
+        }
+
+        [Fact]
+        public void TryPurchaseItem_WhenInventoryRejectsItem_DoesNotDeductCurrency()
+        {
+            PlayerData playerData = new(500);
+            ConsumableItem existingItem = CreateStackableItem();
+            Assert.True(playerData.TryAddItem(existingItem, 1));
+
+            QuestItem incompatibleItem = new()
+            {
+                Id = existingItem.Id,
+                Name = existingItem.Name,
+                Stackable = true,
+                MaxStackSize = 10
+            };
+
+            bool purchased = playerData.TryPurchaseItem(
+                incompatibleItem,
+                100,
+                1,
+                out string failureReason
+            );
+
+            Assert.False(purchased);
+            Assert.Equal("Không thể thêm vật phẩm vào Inventory.", failureReason);
+            Assert.Equal(500, playerData.Currency);
+            Assert.Equal(1, playerData.GetItemQuantity(existingItem.Id));
+            Assert.Same(existingItem, playerData.Inventory[0].Item);
+        }
     }
 }

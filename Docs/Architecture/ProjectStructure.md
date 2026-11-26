@@ -25,6 +25,10 @@ RPG-2D/
 │   ├── reference/ninja_adventure/
 │   └── ui/ninja_adventure/
 ├── data/
+│   ├── dialogues/
+│   ├── items/
+│   ├── player/
+│   ├── shops/
 │   └── world/
 ├── Docs/
 │   ├── Architecture/
@@ -37,7 +41,10 @@ RPG-2D/
 │   ├── bootstrap/
 │   └── features/
 │       ├── combat/
-│       └── exploration/
+│       ├── exploration/
+│       ├── interaction/
+│       ├── playerdata/
+│       └── shop/
 ├── Tests/
 ├── Tools/
 │   └── Tests/
@@ -65,7 +72,11 @@ RPG-2D/
 | `data/` | Authored game content grouped by domain; stable IDs are separate from player-facing labels. |
 | `scenes/` | Godot scenes grouped by player-facing feature or composition role. |
 | `scripts/bootstrap/` | Application entry point and top-level runtime composition. |
-| `scripts/features/` | Feature-owned gameplay and presentation code. |
+| `scripts/features/` | Feature-owned gameplay and presentation code, grouped by domain. |
+| `scripts/features/exploration/` | Player movement, animation and player-side interaction orchestration. |
+| `scripts/features/interaction/` | Terminal interaction components and dialogue definitions/loading. |
+| `scripts/features/playerdata/` | Typed item definitions, Inventory/currency state and player-data loading. |
+| `scripts/features/shop/` | Shop state and transaction rules, authored catalogue loading, and interaction UI. |
 | `Tests/` | .NET tests for pure game/domain behavior and integration seams. |
 | `Tools/` | Repository validation and development utilities. |
 | `Tools/Tests/` | Python unit tests for repository tooling. |

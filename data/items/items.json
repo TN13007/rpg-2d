@@ -25,6 +25,22 @@
       "description": "Một vật phẩm liên quan đến nhiệm vụ.",
       "stackable": true,
       "maxStackSize": 10
+    },
+    {
+      "id": "item_a",
+      "type": "Consumable",
+      "name": "Đồ A",
+      "description": "Vật phẩm kiểm thử A.",
+      "stackable": true,
+      "maxStackSize": 20
+    },
+    {
+      "id": "item_b",
+      "type": "Consumable",
+      "name": "Đồ B",
+      "description": "Vật phẩm kiểm thử B.",
+      "stackable": true,
+      "maxStackSize": 20
     }
   ]
 }

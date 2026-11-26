@@ -21,11 +21,18 @@ namespace RPG2D.Features.PlayerData
         private readonly List<PlayerItemStack> _inventory = new();
         private readonly IReadOnlyList<PlayerItemStack> _inventoryView;
 
-        public PlayerData()
+        public PlayerData(int currency = 0)
         {
+            if (currency < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(currency));
+            }
+
+            Currency = currency;
             _inventoryView = _inventory.AsReadOnly();
         }
 
+        public int Currency { get; private set; }
         public IReadOnlyList<PlayerItemStack> Inventory => _inventoryView;
 
         public int GetItemQuantity(string itemId)
@@ -164,6 +171,110 @@ namespace RPG2D.Features.PlayerData
             }
 
             return remaining == 0;
+        }
+
+        public bool TryAddCurrency(int amount)
+        {
+            if (amount <= 0 || (long)Currency + amount > int.MaxValue)
+            {
+                return false;
+            }
+
+            Currency += amount;
+            return true;
+        }
+
+        public bool TrySpendCurrency(int amount, bool allowDebt = false)
+        {
+            if (amount <= 0)
+            {
+                return false;
+            }
+
+            long nextBalance = (long)Currency - amount;
+            if ((!allowDebt && nextBalance < 0) || nextBalance < int.MinValue)
+            {
+                return false;
+            }
+
+            Currency = (int)nextBalance;
+            return true;
+        }
+
+        public bool TryPurchaseItem(Item item, int unitPrice, int quantity, out string failureReason)
+        {
+            failureReason = string.Empty;
+            if (item == null || !item.IsValid() || unitPrice < 0 || quantity <= 0)
+            {
+                failureReason = "Thông tin giao dịch không hợp lệ.";
+                return false;
+            }
+
+            long totalCost = (long)unitPrice * quantity;
+            if (totalCost > int.MaxValue)
+            {
+                failureReason = "Tổng giá trị giao dịch vượt giới hạn.";
+                return false;
+            }
+
+            if (Currency < totalCost)
+            {
+                failureReason = "Bạn không đủ tiền.";
+                return false;
+            }
+
+            if (!TryAddItem(item, quantity))
+            {
+                failureReason = "Không thể thêm vật phẩm vào Inventory.";
+                return false;
+            }
+
+            Currency -= (int)totalCost;
+            return true;
+        }
+
+        public bool TrySellItem(
+            string itemId,
+            int unitPrice,
+            int quantity,
+            out string failureReason
+        )
+        {
+            failureReason = string.Empty;
+            if (string.IsNullOrWhiteSpace(itemId) || unitPrice <= 0 || quantity <= 0)
+            {
+                failureReason = "Thông tin giao dịch không hợp lệ.";
+                return false;
+            }
+
+            if (!HasItem(itemId, quantity))
+            {
+                failureReason = "Bạn không có đủ vật phẩm.";
+                return false;
+            }
+
+            long totalRevenue = (long)unitPrice * quantity;
+            if (totalRevenue > int.MaxValue)
+            {
+                failureReason = "Tổng giá trị giao dịch vượt giới hạn.";
+                return false;
+            }
+
+            long nextBalance = (long)Currency + totalRevenue;
+            if (nextBalance > int.MaxValue)
+            {
+                failureReason = "Số vàng nhận được vượt giới hạn.";
+                return false;
+            }
+
+            if (!TryRemoveItem(itemId, quantity))
+            {
+                failureReason = "Không thể trừ vật phẩm khỏi Inventory.";
+                return false;
+            }
+
+            Currency = (int)nextBalance;
+            return true;
         }
 
         private static bool AreCompatibleDefinitions(Item first, Item second)

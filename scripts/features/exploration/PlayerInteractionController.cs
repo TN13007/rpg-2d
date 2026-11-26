@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using Godot;
 using RPG2D.Features.Interaction;
 using RPG2D.Features.Interaction.Data;
+using RPG2D.Features.PlayerData;
+using RPG2D.Features.Shop;
+using PlayerDataState = RPG2D.Features.PlayerData.PlayerData;
 
 namespace RPG2D.Features.Exploration
 {
@@ -12,6 +15,8 @@ namespace RPG2D.Features.Exploration
         private TerminalController? _currentTerminal;
         private TerminalInteractionUI _interactionUi = null!;
         private DialogueDatabase _dialogueDatabase = null!;
+        private PlayerDataState _playerData = null!;
+        private ShopController _shopController = null!;
         private DialogueDefinition? _currentDialogue;
         private IReadOnlyList<DialogueChoiceDefinition> _choiceOptions =
             Array.Empty<DialogueChoiceDefinition>();
@@ -24,11 +29,18 @@ namespace RPG2D.Features.Exploration
             ProcessMode = ProcessModeEnum.Always;
             _playerController = GetParent<PlayerController>();
             _dialogueDatabase = DialogueDatabase.Load();
+            ItemDatabase itemDatabase = ItemDatabase.Load();
+            _playerData = PlayerDataDatabase.Load(itemDatabase);
 
             _interactionUi = new TerminalInteractionUI();
             AddChild(_interactionUi);
             _interactionUi.ChoiceHovered += SelectChoice;
             _interactionUi.ChoiceConfirmed += OnChoiceConfirmed;
+
+            _shopController = new ShopController();
+            AddChild(_shopController);
+            _shopController.Configure(_playerData, itemDatabase);
+            _shopController.LeaveRequested += ReturnToDialogueMenu;
         }
 
         public override void _Process(double delta)
@@ -78,6 +90,12 @@ namespace RPG2D.Features.Exploration
                 return;
             }
 
+            if (_shopController.IsOpen)
+            {
+                _shopController.HandleInput();
+                return;
+            }
+
             if (Input.IsActionJustPressed("interaction_menu_up"))
             {
                 MoveSelection(-1);
@@ -105,13 +123,13 @@ namespace RPG2D.Features.Exploration
 
             _selectedChoiceIndex =
                 (_selectedChoiceIndex + direction + _choiceOptions.Count) % _choiceOptions.Count;
-
             _interactionUi.SetSelectedChoice(_selectedChoiceIndex);
         }
 
         private void SelectChoice(int index)
         {
             if (!_isInteractionOpen ||
+                _shopController.IsOpen ||
                 index < 0 ||
                 index >= _choiceOptions.Count ||
                 _selectedChoiceIndex == index)
@@ -149,6 +167,12 @@ namespace RPG2D.Features.Exploration
             }
 
             DialogueChoiceDefinition choice = _choiceOptions[_selectedChoiceIndex];
+
+            if (string.Equals(choice.Action, "openShop", StringComparison.OrdinalIgnoreCase))
+            {
+                OpenShop();
+                return;
+            }
 
             if (choice.ClosesInteraction)
             {
@@ -199,6 +223,30 @@ namespace RPG2D.Features.Exploration
             _playerController.SetPhysicsProcess(false);
         }
 
+        private void OpenShop()
+        {
+            if (!_shopController.Open())
+            {
+                _interactionUi.SetFeedback("Không thể mở cửa hàng.");
+                return;
+            }
+
+            _interactionUi.HideInteraction();
+        }
+
+        private void ReturnToDialogueMenu()
+        {
+            _shopController.Close();
+
+            if (_currentDialogue == null)
+            {
+                CloseInteraction();
+                return;
+            }
+
+            ShowDialogue(_currentDialogue);
+        }
+
         private void ShowDialogue(string dialogueId)
         {
             if (!_dialogueDatabase.TryGetDialogue(dialogueId, out DialogueDefinition dialogue))
@@ -235,6 +283,7 @@ namespace RPG2D.Features.Exploration
             _isInteractionOpen = false;
             _currentDialogue = null;
             _choiceOptions = Array.Empty<DialogueChoiceDefinition>();
+            _shopController.Close();
             _interactionUi.HideInteraction();
             _playerController.SetPhysicsProcess(true);
             _interactionUi.SetPromptVisible(_currentTerminal != null);
