@@ -77,13 +77,13 @@ namespace RPG2D.Tests
 
             shopData.ChangeQuantity(1);
             ShopDataOutcome outcome = shopData.ConfirmSelection();
-            ShopDataView view = shopData.CreateView();
+            ShopData shopDataView = shopData;
 
             Assert.Equal(ShopDataOutcome.None, outcome);
             Assert.Equal(300, playerData.Currency);
             Assert.Equal(2, playerData.GetItemQuantity("item_a"));
-            Assert.Equal(3, view.Items[0].Stock);
-            Assert.Equal(ShopFeedbackKind.PurchaseSucceeded, view.Feedback.Kind);
+            Assert.Equal(3, shopDataView.Items[0].Stock);
+            Assert.Equal(ShopFeedbackKind.PurchaseSucceeded, shopDataView.Feedback.Kind);
         }
 
         [Fact]
@@ -96,12 +96,12 @@ namespace RPG2D.Tests
 
             ShopData shopData = new(CreateShop(), playerData, itemDatabase);
             shopData.SetMode(ShopMode.Selling);
-            ShopDataView view = shopData.CreateView();
+            ShopData shopDataView = shopData;
 
-            Assert.Single(view.Items);
-            Assert.Equal("health_potion", view.Items[0].ItemId);
-            Assert.Equal(3, view.Items[0].OwnedQuantity);
-            Assert.True(view.Items[0].IsAvailable);
+            Assert.Single(shopDataView.Items);
+            Assert.Equal("health_potion", shopDataView.Items[0].ItemId);
+            Assert.Equal(3, shopDataView.Items[0].OwnedQuantity);
+            Assert.True(shopDataView.Items[0].IsAvailable);
         }
 
         [Fact]
@@ -116,13 +116,13 @@ namespace RPG2D.Tests
             shopData.SetMode(ShopMode.Selling);
             shopData.ChangeQuantity(1);
             ShopDataOutcome outcome = shopData.ConfirmSelection();
-            ShopDataView view = shopData.CreateView();
+            ShopData shopDataView = shopData;
 
             Assert.Equal(ShopDataOutcome.None, outcome);
             Assert.Equal(80, playerData.Currency);
             Assert.Equal(1, playerData.GetItemQuantity("health_potion"));
-            Assert.Equal(1, view.Items[0].OwnedQuantity);
-            Assert.Equal(ShopFeedbackKind.SaleSucceeded, view.Feedback.Kind);
+            Assert.Equal(1, shopDataView.Items[0].OwnedQuantity);
+            Assert.Equal(ShopFeedbackKind.SaleSucceeded, shopDataView.Feedback.Kind);
         }
 
         [Fact]
@@ -136,12 +136,12 @@ namespace RPG2D.Tests
             ShopData shopData = new(CreateShop(), playerData, itemDatabase);
             shopData.SetMode(ShopMode.Selling);
             shopData.ConfirmSelection();
-            ShopDataView view = shopData.CreateView();
+            ShopData shopDataView = shopData;
 
             Assert.Equal(25, playerData.Currency);
             Assert.Equal(1, playerData.GetItemQuantity("ancient_key"));
-            Assert.Equal(ShopFeedbackKind.ItemNotAccepted, view.Feedback.Kind);
-            Assert.False(view.Items[0].IsAvailable);
+            Assert.Equal(ShopFeedbackKind.ItemNotAccepted, shopDataView.Feedback.Kind);
+            Assert.False(shopDataView.Items[0].IsAvailable);
         }
 
         [Fact]
@@ -163,15 +163,15 @@ namespace RPG2D.Tests
             PlayerData playerData = new(500);
             ShopData shopData = new(CreateShop(), playerData, itemDatabase);
 
-            ShopDataView view = shopData.CreateView();
+            ShopData shopDataView = shopData;
 
-            Assert.Equal("Cửa hàng thử nghiệm", view.ShopName);
-            Assert.Equal(ShopMode.Buying, view.Mode);
-            Assert.Equal(500, view.Currency);
-            Assert.Single(view.Items);
-            Assert.Equal("item_a", view.Items[0].ItemId);
-            Assert.Equal(5, view.Items[0].Stock);
-            Assert.Equal(1, view.SelectedQuantity);
+            Assert.Equal("Cửa hàng thử nghiệm", shopDataView.ShopName);
+            Assert.Equal(ShopMode.Buying, shopDataView.Mode);
+            Assert.Equal(500, shopDataView.Currency);
+            Assert.Single(shopDataView.Items);
+            Assert.Equal("item_a", shopDataView.Items[0].ItemId);
+            Assert.Equal(5, shopDataView.Items[0].Stock);
+            Assert.Equal(1, shopDataView.SelectedQuantity);
         }
 
         private static Item GetItem(ItemDatabase itemDatabase, string itemId)

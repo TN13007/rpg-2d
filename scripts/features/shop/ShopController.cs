@@ -185,7 +185,7 @@ namespace RPG2D.Features.Shop
                 return;
             }
 
-            _shopUi.ShowShop(_shopData.CreateView());
+            _shopUi.ShowShop(_shopData);
         }
 
         private void RefreshDetails()
@@ -195,7 +195,7 @@ namespace RPG2D.Features.Shop
                 return;
             }
 
-            _shopUi.RefreshDetails(_shopData.CreateView());
+            _shopUi.RefreshDetails(_shopData);
         }
     }
 }

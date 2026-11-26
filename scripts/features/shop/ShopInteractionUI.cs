@@ -52,35 +52,37 @@ namespace RPG2D.Features.Shop
             BuildInterface();
         }
 
-        public void ShowShop(ShopDataView view)
+        public void ShowShop(ShopData shopData)
         {
-            _shopTitleLabel.Text = view.ShopName;
-            _itemsHeadingLabel.Text = view.Mode == ShopMode.Buying
+            IReadOnlyList<ShopItemOption> items = shopData.Items;
+            _shopTitleLabel.Text = shopData.ShopName;
+            _itemsHeadingLabel.Text = shopData.Mode == ShopMode.Buying
                 ? "Hàng hóa"
                 : "Vật phẩm đang sở hữu";
-            _buyModeButton.Disabled = view.Mode == ShopMode.Buying;
-            _sellModeButton.Disabled = view.Mode != ShopMode.Buying;
+            _buyModeButton.Disabled = shopData.Mode == ShopMode.Buying;
+            _sellModeButton.Disabled = shopData.Mode != ShopMode.Buying;
             _controlsLabel.Text =
                 "W / S — Chọn vật phẩm     A / D — Số lượng     Tab — Chuyển Mua / Bán     Space — Xác nhận / Rời cửa hàng     Esc — Đóng";
-            SetItems(BuildItemNames(view));
+            SetItems(BuildItemNames(shopData.Mode, items));
             _shopPanel.Visible = true;
-            SetSelectedItem(view.SelectedIndex);
-            UpdateDetails(view);
+            SetSelectedItem(shopData.SelectedIndex);
+            UpdateDetails(shopData, items);
         }
 
-        public void RefreshDetails(ShopDataView view)
+        public void RefreshDetails(ShopData shopData)
         {
-            SetSelectedItem(view.SelectedIndex);
-            UpdateDetails(view);
+            IReadOnlyList<ShopItemOption> items = shopData.Items;
+            SetSelectedItem(shopData.SelectedIndex);
+            UpdateDetails(shopData, items);
         }
 
-        private static List<string> BuildItemNames(ShopDataView view)
+        private static List<string> BuildItemNames(ShopMode mode, IReadOnlyList<ShopItemOption> items)
         {
             List<string> itemNames = new();
 
-            foreach (ShopItemOption option in view.Items)
+            foreach (ShopItemOption option in items)
             {
-                if (view.Mode == ShopMode.Buying)
+                if (mode == ShopMode.Buying)
                 {
                     itemNames.Add(option.Item?.Name ?? $"Không rõ: {option.ItemId}");
                     continue;
@@ -112,14 +114,14 @@ namespace RPG2D.Features.Shop
             _itemsScrollContainer.EnsureControlVisible(_rows[index].Row);
         }
 
-        private void UpdateDetails(ShopDataView view)
+        private void UpdateDetails(ShopData shopData, IReadOnlyList<ShopItemOption> items)
         {
-            string currency = $"Tiền hiện có: {view.Currency:N0} vàng";
-            string feedback = FormatFeedback(view.Feedback);
+            string currency = $"Tiền hiện có: {shopData.Currency:N0} vàng";
+            string feedback = FormatFeedback(shopData.Feedback);
 
-            if (view.Mode == ShopMode.Buying)
+            if (mode == ShopMode.Buying)
             {
-                if (view.SelectedIndex == view.Items.Count)
+                if (shopData.SelectedIndex == items.Count)
                 {
                     SetDetails(
                         "Rời cửa hàng",
@@ -133,9 +135,9 @@ namespace RPG2D.Features.Shop
                     return;
                 }
 
-                ShopItemOption? option = view.SelectedIndex >= 0 &&
-                    view.SelectedIndex < view.Items.Count
-                        ? view.Items[view.SelectedIndex]
+                ShopItemOption? option = shopData.SelectedIndex >= 0 &&
+                    shopData.SelectedIndex < items.Count
+                        ? items[shopData.SelectedIndex]
                         : null;
 
                 if (option?.Item == null)
@@ -146,7 +148,7 @@ namespace RPG2D.Features.Shop
                         option == null ? string.Empty : $"Giá mua: {option.UnitPrice:N0}",
                         option == null ? string.Empty : $"Tồn kho: {option.Stock}",
                         currency,
-                        option == null ? string.Empty : $"Số lượng mua: {view.SelectedQuantity}",
+                        option == null ? string.Empty : $"Số lượng mua: {shopData.SelectedQuantity}",
                         feedback
                     );
                     return;
@@ -158,13 +160,13 @@ namespace RPG2D.Features.Shop
                     $"Giá mua: {option.UnitPrice:N0} vàng / món",
                     $"Còn lại: {option.Stock}",
                     currency,
-                    $"Số lượng mua: {view.SelectedQuantity}",
+                    $"Số lượng mua: {shopData.SelectedQuantity}",
                     feedback
                 );
                 return;
             }
 
-            if (view.InventoryIsEmpty)
+            if ((shopData.Mode == ShopMode.Selling && items.Count == 0))
             {
                 SetDetails(
                     "Inventory trống",
@@ -178,13 +180,13 @@ namespace RPG2D.Features.Shop
                 return;
             }
 
-            if (view.SelectedIndex == view.Items.Count)
+            if (shopData.SelectedIndex == items.Count)
             {
                 SetDetails(
                     "Rời cửa hàng",
                     "Quay lại danh sách lựa chọn ban đầu.",
                     string.Empty,
-                    $"Đang sở hữu: {view.Items.Count} loại vật phẩm",
+                    $"Đang sở hữu: {items.Count} loại vật phẩm",
                     currency,
                     string.Empty,
                     feedback
@@ -192,7 +194,7 @@ namespace RPG2D.Features.Shop
                 return;
             }
 
-            ShopItemOption selectedOption = view.Items[view.SelectedIndex];
+            ShopItemOption selectedOption = items[shopData.SelectedIndex];
             string price = selectedOption.IsAvailable
                 ? $"Giá thu mua: {selectedOption.UnitPrice:N0} vàng / món"
                 : "Cửa hàng không thu mua vật phẩm này.";
@@ -204,7 +206,7 @@ namespace RPG2D.Features.Shop
                 $"Sở hữu: {selectedOption.OwnedQuantity}",
                 currency,
                 selectedOption.IsAvailable
-                    ? $"Số lượng bán: {view.SelectedQuantity}"
+                    ? $"Số lượng bán: {shopData.SelectedQuantity}"
                     : string.Empty,
                 feedback
             );

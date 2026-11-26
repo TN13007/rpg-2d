@@ -83,39 +83,6 @@ namespace RPG2D.Features.Shop
         public bool IsAvailable { get; }
     }
 
-    public sealed class ShopDataView
-    {
-        public ShopDataView(
-            string shopName,
-            ShopMode mode,
-            IReadOnlyList<ShopItemOption> items,
-            int selectedIndex,
-            int selectedQuantity,
-            int currency,
-            bool inventoryIsEmpty,
-            ShopFeedback feedback
-        )
-        {
-            ShopName = shopName;
-            Mode = mode;
-            Items = items;
-            SelectedIndex = selectedIndex;
-            SelectedQuantity = selectedQuantity;
-            Currency = currency;
-            InventoryIsEmpty = inventoryIsEmpty;
-            Feedback = feedback;
-        }
-
-        public string ShopName { get; }
-        public ShopMode Mode { get; }
-        public IReadOnlyList<ShopItemOption> Items { get; }
-        public int SelectedIndex { get; }
-        public int SelectedQuantity { get; }
-        public int Currency { get; }
-        public bool InventoryIsEmpty { get; }
-        public ShopFeedback Feedback { get; }
-    }
-
     public sealed class ShopData
     {
         private const int DebugCurrencyAmount = 1000;
@@ -140,7 +107,13 @@ namespace RPG2D.Features.Shop
             _itemDatabase = itemDatabase ?? throw new ArgumentNullException(nameof(itemDatabase));
         }
 
+        public string ShopName => _shop.Name;
         public ShopMode Mode => _mode;
+        public IReadOnlyList<ShopItemOption> Items => BuildItems().AsReadOnly();
+        public int SelectedIndex => _selectedIndex;
+        public int SelectedQuantity => _selectedQuantity;
+        public int Currency => _playerData.Currency;
+        public ShopFeedback Feedback => _feedback;
 
         public void SetMode(ShopMode mode)
         {
@@ -257,23 +230,6 @@ namespace RPG2D.Features.Shop
                     ShopFeedbackKind.CurrencySpendFailed,
                     amount: DebugCurrencyAmount
                 );
-        }
-
-        public ShopDataView CreateView()
-        {
-            List<ShopItemOption> items = BuildItems();
-            _selectedIndex = Math.Clamp(_selectedIndex, 0, items.Count);
-
-            return new ShopDataView(
-                _shop.Name,
-                _mode,
-                items.AsReadOnly(),
-                _selectedIndex,
-                _selectedQuantity,
-                _playerData.Currency,
-                _mode == ShopMode.Selling && items.Count == 0,
-                _feedback
-            );
         }
 
         private List<ShopItemOption> BuildItems()
