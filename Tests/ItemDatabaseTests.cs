@@ -14,14 +14,14 @@ namespace RPG2D.Tests
               "items": [
                 {
                   "id": "health_potion",
-                  "type": "consumable",
+                  "type": "Consumable",
                   "name": "Health Potion",
                   "stackable": true,
                   "maxStackSize": 20
                 },
                 {
                   "id": "iron_sword",
-                  "type": "equipment",
+                  "type": "Equipment",
                   "name": "Iron Sword",
                   "stackable": false,
                   "maxStackSize": 1,
@@ -29,7 +29,7 @@ namespace RPG2D.Tests
                 },
                 {
                   "id": "ancient_key",
-                  "type": "quest",
+                  "type": "Quest",
                   "name": "Ancient Key",
                   "stackable": true,
                   "maxStackSize": 10
@@ -56,11 +56,11 @@ namespace RPG2D.Tests
         [InlineData("")]
         public void FromJson_SkipsUnknownItemTypes(string itemType)
         {
-            string json = CreateManifest(
-                """{"id":"unknown_item","type":""" + System.Text.Json.JsonSerializer.Serialize(itemType) + ""","name":"Unknown","stackable":true,"maxStackSize":10}"""
-            );
+            string itemJson = "{\"id\":\"unknown_item\",\"type\":" +
+                System.Text.Json.JsonSerializer.Serialize(itemType) +
+                ",\"name\":\"Unknown\",\"stackable\":true,\"maxStackSize\":10}";
 
-            ItemDatabase database = ItemDatabase.FromJson(json);
+            ItemDatabase database = ItemDatabase.FromJson(CreateManifest(itemJson));
 
             Assert.False(database.TryGetItem("unknown_item", out _));
         }
@@ -70,12 +70,11 @@ namespace RPG2D.Tests
         [InlineData("")]
         public void FromJson_SkipsEquipmentWithUnknownSlot(string slot)
         {
-            string json = CreateManifest(
-                """{"id":"invalid_equipment","type":"equipment","name":"Invalid Equipment","stackable":false,"maxStackSize":1,"equipmentSlot":"""
-                + System.Text.Json.JsonSerializer.Serialize(slot) + "}"
-            );
+            string itemJson = "{\"id\":\"invalid_equipment\",\"type\":\"Equipment\"," +
+                "\"name\":\"Invalid Equipment\",\"stackable\":false,\"maxStackSize\":1," +
+                "\"equipmentSlot\":" + System.Text.Json.JsonSerializer.Serialize(slot) + "}";
 
-            ItemDatabase database = ItemDatabase.FromJson(json);
+            ItemDatabase database = ItemDatabase.FromJson(CreateManifest(itemJson));
 
             Assert.False(database.TryGetItem("invalid_equipment", out _));
         }
@@ -89,7 +88,7 @@ namespace RPG2D.Tests
               "items": [
                 {
                   "id": "stacking_sword",
-                  "type": "equipment",
+                  "type": "Equipment",
                   "name": "Stacking Sword",
                   "stackable": true,
                   "maxStackSize": 5,

@@ -109,9 +109,9 @@ namespace RPG2D.Features.PlayerData
 
             Item commonItem = type switch
             {
-                "consumable" => new ConsumableItem(),
-                "equipment" => new EquipmentItem(),
-                "quest" => new QuestItem(),
+                "Consumable" => new ConsumableItem(),
+                "Equipment" => new EquipmentItem(),
+                "Quest" => new QuestItem(),
                 _ => null!
             };
 

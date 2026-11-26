@@ -24,7 +24,7 @@ Every item contains:
 | Field | Type | Rule |
 |---|---|---|
 | \`id\` | string | Required and unique, compared case-insensitively |
-| \`type\` | string | \`consumable\`, \`equipment\`, or \`quest\` |
+| \`type\` | string | \`Consumable\`, \`Equipment\`, or \`Quest\` |
 | \`name\` | string | Required |
 | \`description\` | string | Optional display text |
 | \`stackable\` | boolean | Whether copies can share a stack |

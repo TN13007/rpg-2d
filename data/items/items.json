@@ -3,7 +3,7 @@
   "items": [
     {
       "id": "health_potion",
-      "type": "consumable",
+      "type": "Consumable",
       "name": "Bình máu",
       "description": "Hồi phục HP khi sử dụng.",
       "stackable": true,
@@ -11,7 +11,7 @@
     },
     {
       "id": "iron_sword",
-      "type": "equipment",
+      "type": "Equipment",
       "name": "Kiếm sắt",
       "description": "Một thanh kiếm sắt.",
       "stackable": false,
@@ -20,7 +20,7 @@
     },
     {
       "id": "ancient_key",
-      "type": "quest",
+      "type": "Quest",
       "name": "Chìa khóa cổ",
       "description": "Một vật phẩm liên quan đến nhiệm vụ.",
       "stackable": true,
