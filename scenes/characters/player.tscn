@@ -2,11 +2,14 @@
 
 [ext_resource type="Script" uid="uid://tgegpr0aaxms" path="res://scripts/features/exploration/PlayerController.cs" id="1_controller"]
 [ext_resource type="Texture2D" uid="uid://cr4heugrrgs2t" path="res://assets/characters/ninja_adventure/characters/Boy/SpriteSheet.png" id="2_sprite"]
-[ext_resource type="Script" path="res://scripts/features/exploration/PlayerAnimationController.cs" id="3_animation_controller"]
-[ext_resource type="Script" path="res://scripts/features/exploration/PlayerInteractionController.cs" id="4_interaction_controller"]
+[ext_resource type="Script" uid="uid://b0cvwkqahydmp" path="res://scripts/features/exploration/PlayerAnimationController.cs" id="3_animation_controller"]
+[ext_resource type="Script" uid="uid://bihf73ksidrki" path="res://scripts/features/exploration/PlayerInteractionController.cs" id="4_interaction_controller"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_player"]
 size = Vector2(8, 6)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_interaction_detection"]
+size = Vector2(12, 12)
 
 [sub_resource type="Animation" id="Animation_yewv4"]
 length = 0.001
@@ -247,11 +250,7 @@ states/Walk/position = Vector2(639, 100)
 transitions = ["Start", "Idle", SubResource("AnimationNodeStateMachineTransition_yewv4"), "Idle", "Walk", SubResource("AnimationNodeStateMachineTransition_76oj4"), "Walk", "Idle", SubResource("AnimationNodeStateMachineTransition_dyp2m")]
 graph_offset = Vector2(-9, 15)
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_interaction_detection"]
-size = Vector2(12, 12)
-
 [node name="Player" type="CharacterBody2D" unique_id=1662096582]
-y_sort_origin = 8
 motion_mode = 1
 script = ExtResource("1_controller")
 
@@ -267,15 +266,12 @@ shape = SubResource("RectangleShape2D_player")
 [node name="Camera2D" type="Camera2D" parent="." unique_id=1815324003]
 zoom = Vector2(3, 3)
 
-
-[node name="InteractionShapeCast2D" type="ShapeCast2D" parent="."]
+[node name="InteractionShapeCast2D" type="ShapeCast2D" parent="." unique_id=747955261]
 shape = SubResource("RectangleShape2D_interaction_detection")
-target_position = Vector2(0, 20)
+target_position = Vector2(0, 8)
+margin = 0.1
 collision_mask = 3
 collide_with_areas = true
-collide_with_bodies = true
-exclude_parent = true
-margin = 0.1
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=22847633]
 libraries/ = SubResource("AnimationLibrary_dyp2m")
@@ -289,5 +285,5 @@ parameters/Walk/blend_position = Vector2(0, 1)
 [node name="PlayerAnimationController" type="Node" parent="." unique_id=1902001001]
 script = ExtResource("3_animation_controller")
 
-[node name="PlayerInteractionController" type="Node" parent="."]
+[node name="PlayerInteractionController" type="Node" parent="." unique_id=2059835277]
 script = ExtResource("4_interaction_controller")
