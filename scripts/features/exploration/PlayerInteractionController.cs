@@ -15,7 +15,7 @@ namespace RPG2D.Features.Exploration
 
         private PlayerController _playerController = null!;
         private PlayerAnimationController _playerAnimationController = null!;
-        private RayCast2D _interactionRay = null!;
+        private ShapeCast2D _interactionShapeCast = null!;
         private DialogueInteractableController? _currentInteractable;
         private TerminalInteractionUI _interactionUi = null!;
         private DialogueDatabase _dialogueDatabase = null!;
@@ -34,10 +34,10 @@ namespace RPG2D.Features.Exploration
             _playerController = GetParent<PlayerController>();
             _playerAnimationController =
                 _playerController.GetNode<PlayerAnimationController>("PlayerAnimationController");
-            _interactionRay = GetNode<RayCast2D>("../InteractionRayCast2D");
-            _interactionRay.CollisionMask = 1;
-            _interactionRay.CollideWithAreas = false;
-            _interactionRay.CollideWithBodies = true;
+            _interactionShapeCast = GetNode<ShapeCast2D>("../InteractionShapeCast2D");
+            _interactionShapeCast.CollisionMask = 1;
+            _interactionShapeCast.CollideWithAreas = false;
+            _interactionShapeCast.CollideWithBodies = true;
 
             _dialogueDatabase = DialogueDatabase.Load();
             ItemDatabase itemDatabase = ItemDatabase.Load();
@@ -72,14 +72,14 @@ namespace RPG2D.Features.Exploration
 
         private void UpdateCurrentInteractable()
         {
-            _interactionRay.TargetPosition =
+            _interactionShapeCast.TargetPosition =
                 _playerAnimationController.FacingDirection * InteractionRange;
-            _interactionRay.ForceRaycastUpdate();
+            _interactionShapeCast.ForceShapecastUpdate();
 
             DialogueInteractableController? interactable = null;
 
-            if (_interactionRay.IsColliding() &&
-                _interactionRay.GetCollider() is Node2D collider)
+            if (_interactionShapeCast.GetCollisionCount() > 0 &&
+                _interactionShapeCast.GetCollider(0) is Node2D collider)
             {
                 interactable = collider.GetParent() as DialogueInteractableController;
             }
