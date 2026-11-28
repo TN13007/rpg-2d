@@ -270,8 +270,8 @@ size = Vector2(12, 12)
 [node name="InteractionShapeCast2D" type="ShapeCast2D" parent="."]
 shape = SubResource("RectangleShape2D_interaction_detection")
 target_position = Vector2(0, 20)
-collision_mask = 1
-collide_with_areas = false
+collision_mask = 3
+collide_with_areas = true
 collide_with_bodies = true
 exclude_parent = true
 margin = 0.1
