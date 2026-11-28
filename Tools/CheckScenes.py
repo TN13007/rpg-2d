@@ -20,7 +20,6 @@ SECTION_ORDER = {
     "connection": 3,
 }
 HEADER_PATTERN = re.compile(r'^\[(gd_scene|ext_resource|sub_resource|node|connection)(?:\s+(.*?))?\]\s*(?:;.*)?$')
-QUOTED_ATTRIBUTE = re.compile(r'\b([A-Za-z_][A-Za-z0-9_]*)\s*=\s*"((?:\\.|[^"])*)"')
 RESOURCE_REFERENCE = re.compile(r'\b(ExtResource|SubResource)\s*\(\s*"([^"]+)"\s*\)')
 RESOURCE_PATH = re.compile(r'"(res://[^"]+)"')
 
@@ -33,10 +32,6 @@ class SceneIssue:
 
     def __str__(self) -> str:
         return f"{self.path}:{self.line}: error: {self.message}"
-
-
-def _attributes(raw: str) -> dict[str, str]:
-    return {key: value for key, value in QUOTED_ATTRIBUTE.findall(raw)}
 
 
 def _quoted_value(raw: str, key: str) -> str | None:
@@ -105,7 +100,6 @@ def validate_scene(scene_path: Path, project_root: Path) -> list[SceneIssue]:
     node_entries: list[tuple[int, dict[str, str]]] = []
 
     for line_number, section, raw_attributes in entries:
-        attributes = _attributes(raw_attributes)
         if section in declared_resources:
             resource_id = _quoted_value(raw_attributes, "id")
             if not resource_id:
@@ -114,11 +108,6 @@ def validate_scene(scene_path: Path, project_root: Path) -> list[SceneIssue]:
                 issues.append(SceneIssue(scene_path, line_number, f"duplicate {section} id {resource_id!r}"))
             else:
                 declared_resources[section].add(resource_id)
-
-            if section == "ext_resource":
-                resource_path = _quoted_value(raw_attributes, "path")
-                if resource_path:
-                    _validate_resource_path(resource_path, scene_path, project_root, line_number, issues)
 
         elif section == "node":
             name = _quoted_value(raw_attributes, "name")
@@ -158,9 +147,6 @@ def validate_scene(scene_path: Path, project_root: Path) -> list[SceneIssue]:
         node_paths.append((line_number, parent, node_path))
 
     for line_number, parent, node_path in node_paths:
-        if parent != "." and parent not in known_paths:
-            # Defer resolution until all paths have been collected.
-            pass
         if node_path in known_paths:
             issues.append(SceneIssue(scene_path, line_number, f"duplicate node path {node_path!r}"))
         known_paths.add(node_path)
