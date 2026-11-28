@@ -25,6 +25,7 @@ def main():
     args = parser.parse_args()
     commands = [
         [sys.executable, "-m", "unittest", "discover", "-s", "Tools/Tests", "-p", "Test*.py", "-v"],
+        [sys.executable, "Tools/CheckScenes.py"],
         [sys.executable, "Tools/CheckMarkdown.py"],
         [sys.executable, "Tools/CheckProjectNaming.py", "--base", args.base, "--head", args.head, "--branch", args.branch],
     ]
