@@ -37,6 +37,8 @@ RPG-2D/
 │   ├── characters/
 │   ├── prototypes/
 │   └── world/
+│       ├── characters/
+│       └── interactables/
 ├── scripts/
 │   ├── bootstrap/
 │   └── features/
@@ -74,7 +76,7 @@ RPG-2D/
 | `scripts/bootstrap/` | Application entry point and top-level runtime composition. |
 | `scripts/features/` | Feature-owned gameplay and presentation code, grouped by domain. |
 | `scripts/features/exploration/` | Player movement, animation and player-side interaction orchestration. |
-| `scripts/features/interaction/` | Terminal interaction components and dialogue definitions/loading. |
+| `scripts/features/interaction/` | Dialogue interactable configuration, dialogue UI and dialogue definitions/loading. |
 | `scripts/features/playerdata/` | Typed item definitions, Inventory/currency state and player-data loading. |
 | `scripts/features/shop/` | Shop state and transaction rules, authored catalogue loading, and interaction UI. |
 | `Tests/` | .NET tests for pure game/domain behavior and integration seams. |
@@ -82,6 +84,8 @@ RPG-2D/
 | `Tools/Tests/` | Python unit tests for repository tooling. |
 | `Docs/Design/` | Intended player experience and accepted gameplay rules. |
 | `Docs/Architecture/` | Current code ownership, boundaries and runtime/data flows. |
+
+`PlayerInteractionController` uses a forward-facing 12×12 `ShapeCast2D` that detects world bodies on physics layer 1 and dedicated `InteractionArea` nodes on layer 2. Each interactable scene owns its own Area2D shape, independently of its solid collision shape; NPC and Terminal therefore control their interaction footprint without changing movement physics. The cast selects the nearest collision so solid world geometry continues to occlude targets. Each interactable scene supplies its own `DialogueId` and `CanCancelInteraction`; NPC dialogue cannot be cancelled with Escape, while Terminal interaction can. The player controller owns prompt visibility, dialogue navigation, cancellation and movement lock.
 
 Keep scenes, scripts, data and assets separate by purpose. Keep feature-specific code near its feature. Shared code requires a real second consumer. Do not create empty classes, placeholder managers or generic abstractions to populate folders. The `.godot/` cache and generated build output must not be committed.
 

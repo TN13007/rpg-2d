@@ -1,7 +1,8 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene load_steps=6 format=3]
 
 [ext_resource type="PackedScene" path="res://scenes/characters/player.tscn" id="1_player"]
 [ext_resource type="PackedScene" path="res://scenes/world/interactables/terminal.tscn" id="2_terminal"]
+[ext_resource type="PackedScene" path="res://scenes/world/characters/npc.tscn" id="3_npc"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_horizontal_wall"]
 size = Vector2(660, 20)
@@ -55,3 +56,6 @@ position = Vector2(-100, 0)
 
 [node name="Terminal" parent="YSort" instance=ExtResource("2_terminal")]
 position = Vector2(100, 0)
+
+[node name="Npc" parent="YSort" instance=ExtResource("3_npc")]
+position = Vector2(0, 100)

@@ -11,8 +11,14 @@ namespace RPG2D.Features.Exploration
 {
     public partial class PlayerInteractionController : Node
     {
+        private const float InteractionRange = 20.0f;
+        private const uint WorldCollisionMask = 1u;
+        private const uint InteractionCollisionMask = 2u;
+
         private PlayerController _playerController = null!;
-        private TerminalController? _currentTerminal;
+        private PlayerAnimationController _playerAnimationController = null!;
+        private ShapeCast2D _interactionShapeCast = null!;
+        private DialogueInteractableController? _currentInteractable;
         private TerminalInteractionUI _interactionUi = null!;
         private DialogueDatabase _dialogueDatabase = null!;
         private PlayerDataState _playerData = null!;
@@ -28,6 +34,13 @@ namespace RPG2D.Features.Exploration
         {
             ProcessMode = ProcessModeEnum.Always;
             _playerController = GetParent<PlayerController>();
+            _playerAnimationController =
+                _playerController.GetNode<PlayerAnimationController>("PlayerAnimationController");
+            _interactionShapeCast = GetNode<ShapeCast2D>("../InteractionShapeCast2D");
+            _interactionShapeCast.CollisionMask = WorldCollisionMask | InteractionCollisionMask;
+            _interactionShapeCast.CollideWithAreas = true;
+            _interactionShapeCast.CollideWithBodies = true;
+
             _dialogueDatabase = DialogueDatabase.Load();
             ItemDatabase itemDatabase = ItemDatabase.Load();
             _playerData = PlayerDataDatabase.Load(itemDatabase);
@@ -51,40 +64,73 @@ namespace RPG2D.Features.Exploration
                 return;
             }
 
-            if (_currentTerminal != null && Input.IsActionJustPressed("interact"))
+            UpdateCurrentInteractable();
+
+            if (_currentInteractable != null && Input.IsActionJustPressed("interact"))
             {
                 OpenInteraction();
             }
         }
 
-        public void SetCurrentTerminal(TerminalController terminal)
+        private void UpdateCurrentInteractable()
         {
-            _currentTerminal = terminal;
+            _interactionShapeCast.TargetPosition =
+                _playerAnimationController.FacingDirection * InteractionRange;
+            _interactionShapeCast.ForceShapecastUpdate();
 
-            if (!_isInteractionOpen)
-            {
-                _interactionUi.SetPromptVisible(true);
-            }
-        }
-
-        public void ClearCurrentTerminal(TerminalController terminal)
-        {
-            if (_currentTerminal != terminal)
+            DialogueInteractableController? interactable = FindNearestInteractable();
+            if (_currentInteractable == interactable)
             {
                 return;
             }
 
-            _currentTerminal = null;
+            _currentInteractable = interactable;
+            _interactionUi.SetPromptVisible(_currentInteractable != null);
+        }
 
-            if (!_isInteractionOpen)
+        private DialogueInteractableController? FindNearestInteractable()
+        {
+            int collisionCount = _interactionShapeCast.GetCollisionCount();
+            if (collisionCount == 0)
             {
-                _interactionUi.SetPromptVisible(false);
+                return null;
             }
+
+            int nearestCollisionIndex = -1;
+            float nearestDistanceSquared = float.MaxValue;
+
+            for (int index = 0; index < collisionCount; index++)
+            {
+                Vector2 collisionPoint = _interactionShapeCast.GetCollisionPoint(index);
+                float distanceSquared = _interactionShapeCast.GlobalPosition.DistanceSquaredTo(collisionPoint);
+
+                if (distanceSquared < nearestDistanceSquared)
+                {
+                    nearestDistanceSquared = distanceSquared;
+                    nearestCollisionIndex = index;
+                }
+            }
+
+            if (nearestCollisionIndex < 0 ||
+                _interactionShapeCast.GetCollider(nearestCollisionIndex) is not Node collider)
+            {
+                return null;
+            }
+
+            if (collider is Area2D interactionArea &&
+                interactionArea.CollisionLayer != InteractionCollisionMask)
+            {
+                return null;
+            }
+
+            return collider.GetParent() as DialogueInteractableController
+                ?? collider.GetParent()?.GetParent() as DialogueInteractableController;
         }
 
         private void HandleInteractionInput()
         {
-            if (Input.IsActionJustPressed("ui_cancel"))
+            if (Input.IsActionJustPressed("ui_cancel") &&
+                _currentInteractable?.CanCancelInteraction == true)
             {
                 CloseInteraction();
                 return;
@@ -210,17 +256,17 @@ namespace RPG2D.Features.Exploration
 
         private void OpenInteraction()
         {
-            if (_currentTerminal == null)
+            if (_currentInteractable == null)
             {
                 return;
             }
 
             if (!_dialogueDatabase.TryGetDialogue(
-                _currentTerminal.DialogueId,
+                _currentInteractable.DialogueId,
                 out DialogueDefinition dialogue))
             {
                 GD.PushWarning(
-                    $"Terminal '{_currentTerminal.Name}' references missing dialogue ID '{_currentTerminal.DialogueId}'."
+                    $"Interactable '{_currentInteractable.Name}' references missing dialogue ID '{_currentInteractable.DialogueId}'."
                 );
                 return;
             }
@@ -294,7 +340,7 @@ namespace RPG2D.Features.Exploration
             _shopController.Close();
             _interactionUi.HideInteraction();
             _playerController.SetPhysicsProcess(true);
-            _interactionUi.SetPromptVisible(_currentTerminal != null);
+            _interactionUi.SetPromptVisible(_currentInteractable != null);
         }
     }
 }
