@@ -33,6 +33,19 @@ For each behavior change, consider:
 
 A test must fail when the intended behavior is broken and pass when it is correct. Do not add tests merely to increase test count.
 
+## Godot scene structure validator
+
+Run the repository's TSCN structural checker from the project root:
+
+```bash
+python Tools/CheckScenes.py
+python Tools/CheckScenes.py scenes/world/characters/npc.tscn
+```
+
+The checker follows the Godot 4 text-scene section order: scene descriptor, external resources, internal resources, nodes and connections. It checks the descriptor, section ordering, one scene root, node-parent paths, duplicate resource/node identifiers, resource references and resolvable `res://` paths. It reports file and line numbers and exits non-zero when it finds an issue.
+
+This is intentionally a structural pre-check, not a second implementation of Godot's text-resource parser. It cannot prove every property value, resource type, script contract or runtime behavior is valid. Godot itself remains authoritative: CI still runs the headless editor import, C# build and configured main-scene smoke test after this checker.
+
 ## Godot verification
 
 Automated tests cannot fully validate scene wiring, exported properties, node paths, input maps, animation timing, collision placement, visual hierarchy or player comprehension.
@@ -63,7 +76,7 @@ Run from the repository root:
 python Tools/Validate.py --base origin/main --head HEAD
 ```
 
-For a PR branch, add `--branch <branch-name> --check-branch`. The unified script runs Python validator tests, Markdown link/anchor validation, changed-path/JSON naming validation and .NET Release tests. It stops at the first failed command and propagates the non-zero exit code. GitHub Actions calls the same entry point.
+For a PR branch, add `--branch <branch-name> --check-branch`. The unified script runs Python tooling tests, the TSCN structure checker, Markdown link/anchor validation, changed-path/JSON naming validation and .NET Release tests. It stops at the first failed command and propagates the non-zero exit code. GitHub Actions calls the same entry point.
 
 ## Test quality
 - Tests must be deterministic and independent of wall-clock time, network and machine-specific paths unless explicitly testing that dependency.
