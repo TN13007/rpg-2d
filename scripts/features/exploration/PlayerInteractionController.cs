@@ -12,6 +12,8 @@ namespace RPG2D.Features.Exploration
     public partial class PlayerInteractionController : Node
     {
         private const float InteractionRange = 20.0f;
+        private const uint WorldCollisionMask = 1u;
+        private const uint InteractionCollisionMask = 2u;
 
         private PlayerController _playerController = null!;
         private PlayerAnimationController _playerAnimationController = null!;
@@ -35,8 +37,8 @@ namespace RPG2D.Features.Exploration
             _playerAnimationController =
                 _playerController.GetNode<PlayerAnimationController>("PlayerAnimationController");
             _interactionShapeCast = GetNode<ShapeCast2D>("../InteractionShapeCast2D");
-            _interactionShapeCast.CollisionMask = 1;
-            _interactionShapeCast.CollideWithAreas = false;
+            _interactionShapeCast.CollisionMask = WorldCollisionMask | InteractionCollisionMask;
+            _interactionShapeCast.CollideWithAreas = true;
             _interactionShapeCast.CollideWithBodies = true;
 
             _dialogueDatabase = DialogueDatabase.Load();
@@ -76,14 +78,7 @@ namespace RPG2D.Features.Exploration
                 _playerAnimationController.FacingDirection * InteractionRange;
             _interactionShapeCast.ForceShapecastUpdate();
 
-            DialogueInteractableController? interactable = null;
-
-            if (_interactionShapeCast.GetCollisionCount() > 0 &&
-                _interactionShapeCast.GetCollider(0) is Node2D collider)
-            {
-                interactable = collider.GetParent() as DialogueInteractableController;
-            }
-
+            DialogueInteractableController? interactable = FindNearestInteractable();
             if (_currentInteractable == interactable)
             {
                 return;
@@ -91,6 +86,45 @@ namespace RPG2D.Features.Exploration
 
             _currentInteractable = interactable;
             _interactionUi.SetPromptVisible(_currentInteractable != null);
+        }
+
+        private DialogueInteractableController? FindNearestInteractable()
+        {
+            int collisionCount = _interactionShapeCast.GetCollisionCount();
+            if (collisionCount == 0)
+            {
+                return null;
+            }
+
+            int nearestCollisionIndex = -1;
+            float nearestDistanceSquared = float.MaxValue;
+
+            for (int index = 0; index < collisionCount; index++)
+            {
+                Vector2 collisionPoint = _interactionShapeCast.GetCollisionPoint(index);
+                float distanceSquared = _interactionShapeCast.GlobalPosition.DistanceSquaredTo(collisionPoint);
+
+                if (distanceSquared < nearestDistanceSquared)
+                {
+                    nearestDistanceSquared = distanceSquared;
+                    nearestCollisionIndex = index;
+                }
+            }
+
+            if (nearestCollisionIndex < 0 ||
+                _interactionShapeCast.GetCollider(nearestCollisionIndex) is not Node collider)
+            {
+                return null;
+            }
+
+            if (collider is Area2D interactionArea &&
+                interactionArea.CollisionLayer != InteractionCollisionMask)
+            {
+                return null;
+            }
+
+            return collider.GetParent() as DialogueInteractableController
+                ?? collider.GetParent()?.GetParent() as DialogueInteractableController;
         }
 
         private void HandleInteractionInput()
