@@ -78,7 +78,7 @@ RPG-2D/
 | `scripts/features/playerdata/` | Typed item definitions, Inventory/currency state and player-data loading. |
 | `scripts/features/shop/` | Shop state and transaction rules, authored catalogue loading, and interaction UI. |
 | `Tests/` | .NET tests for pure game/domain behavior and integration seams. |
-| `Tools/` | Repository validation and development utilities. |
+| `Tools/` | Repository validation and development utilities, including `CheckScenes.py` for Godot TSCN structure checks. |
 | `Tools/Tests/` | Python unit tests for repository tooling. |
 | `Docs/Design/` | Intended player experience and accepted gameplay rules. |
 | `Docs/Architecture/` | Current code ownership, boundaries and runtime/data flows. |
